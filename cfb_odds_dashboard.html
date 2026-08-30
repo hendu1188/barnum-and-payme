@@ -1,0 +1,3106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Barnum & Payme — NCAA Football Odds</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --turf: #1B4332;
+    --turf-dark: #0F2A1F;
+    --turf-line: rgba(245,241,230,0.14);
+    --chalk: #F5F1E6;
+    --chalk-dim: #C9C3B2;
+    --rust: #C1502E;
+    --gold: #D4A24C;
+    --navy: #16213E;
+    --card-bg: #1F4A38;
+    --danger: #B5433A;
+
+    --font-display: 'Anton', 'Arial Narrow', sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--turf);
+    background-image:
+      repeating-linear-gradient(0deg, var(--turf-line) 0px, var(--turf-line) 1px, transparent 1px, transparent 64px);
+    color: var(--chalk);
+    font-family: var(--font-body);
+    min-height: 100vh;
+  }
+
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 28px 20px 60px;
+  }
+
+  /* MASTHEAD */
+  .masthead {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 4px solid var(--gold);
+    padding-bottom: 14px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .masthead h1 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(32px, 6vw, 52px);
+    letter-spacing: 0.5px;
+    margin: 0;
+    line-height: 0.9;
+    color: var(--chalk);
+    text-shadow: 3px 3px 0 var(--rust);
+  }
+
+  .masthead .sub {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding-bottom: 6px;
+  }
+
+  /* HASH MARK DIVIDER */
+  .hash-divider {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    margin: 18px 0 22px;
+    opacity: 0.55;
+  }
+  .hash-divider .tick {
+    width: 2px;
+    height: 10px;
+    background: var(--chalk-dim);
+  }
+  .hash-divider .tick.long { height: 16px; background: var(--gold); }
+  .hash-divider .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--chalk-dim);
+    margin: 0 10px;
+    white-space: nowrap;
+  }
+  .hash-divider .line { flex: 1; height: 1px; background: var(--turf-line); }
+
+  /* API KEY PANEL */
+  .key-panel {
+    background: var(--navy);
+    border: 1px solid rgba(212,162,76,0.35);
+    border-radius: 6px;
+    padding: 18px 20px;
+    margin-bottom: 26px;
+  }
+  .key-panel h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 20px;
+    margin: 0 0 6px;
+    letter-spacing: 0.5px;
+    color: var(--gold);
+  }
+  .key-panel p {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--chalk-dim);
+    margin: 0 0 14px;
+  }
+  .key-panel a { color: var(--gold); }
+
+  .cfbd-block {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed rgba(245,241,230,0.15);
+  }
+  .cfbd-hint {
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--chalk-dim);
+    margin-bottom: 10px;
+  }
+  .cfbd-hint a { color: var(--gold); }
+  .key-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .key-row input {
+    flex: 1;
+    min-width: 220px;
+    background: var(--turf-dark);
+    border: 1px solid rgba(245,241,230,0.25);
+    color: var(--chalk);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 10px 12px;
+    border-radius: 4px;
+    outline: none;
+  }
+  .key-row input:focus { border-color: var(--gold); }
+  .key-row button {
+    background: var(--rust);
+    color: var(--chalk);
+    border: none;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .key-row button:hover { background: #A8442A; }
+  .key-row button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .status-line {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    margin-top: 10px;
+    color: var(--chalk-dim);
+  }
+  .status-line.err { color: #F0A090; }
+  .status-line.ok { color: #9FD8B0; }
+
+  /* WEEK / CONTROLS */
+  .controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .controls .count {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--chalk-dim);
+    letter-spacing: 1px;
+  }
+  .refresh-btn {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 7px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .refresh-btn:hover { background: rgba(212,162,76,0.12); }
+  .refresh-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .refresh-btn.active { background: var(--gold); color: var(--turf-dark); }
+
+  /* GAME CARDS */
+  .games { display: flex; flex-direction: column; gap: 12px; }
+
+  .game-card {
+    background: linear-gradient(165deg, var(--card-bg) 0%, var(--turf-dark) 130%);
+    border: 1px solid rgba(245,241,230,0.1);
+    border-left: 4px solid var(--gold);
+    border-radius: 10px;
+    padding: 16px 18px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+  }
+
+  .game-card.flagged {
+    border-left: 4px solid var(--rust);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.22), 0 0 0 1px rgba(193,80,46,0.3), 0 0 16px rgba(193,80,46,0.1);
+  }
+
+  .model-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #FBC9BE;
+    background: linear-gradient(135deg, rgba(193,80,46,0.32), rgba(193,80,46,0.12));
+    border: 1px solid rgba(193,80,46,0.45);
+    border-radius: 20px;
+    padding: 2px 9px;
+    margin-left: 8px;
+    vertical-align: middle;
+    cursor: help;
+    box-shadow: 0 0 10px rgba(193,80,46,0.2);
+  }
+
+  .game-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .matchup {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 19px;
+    letter-spacing: 0.3px;
+    line-height: 1.15;
+  }
+  .matchup .at { color: var(--gold); font-size: 14px; margin: 0 6px; }
+
+  .kickoff {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--chalk-dim);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .odds-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .odds-cell {
+    background: linear-gradient(165deg, rgba(15,42,31,0.65), rgba(15,42,31,0.4));
+    border: 1px solid rgba(245,241,230,0.06);
+    border-radius: 6px;
+    padding: 9px 10px;
+  }
+  .odds-cell .lbl {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--chalk-dim);
+    margin-bottom: 4px;
+  }
+  .odds-cell .val {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--chalk);
+  }
+  .odds-cell .val small {
+    font-size: 11px;
+    color: var(--chalk-dim);
+    font-weight: 400;
+    display: block;
+  }
+
+  .book-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--chalk-dim);
+    margin-top: 10px;
+    letter-spacing: 0.5px;
+    opacity: 0.7;
+  }
+
+  .rank-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--turf-dark);
+    background: linear-gradient(135deg, #E4B968, var(--gold));
+    border-radius: 3px;
+    padding: 1px 5px;
+    margin-right: 5px;
+    vertical-align: middle;
+    box-shadow: 0 0 8px rgba(212,162,76,0.35);
+  }
+
+  .move {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    margin-left: 5px;
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+  .move.up { color: #C8F2D4; background: linear-gradient(135deg, rgba(159,216,176,0.28), rgba(159,216,176,0.1)); box-shadow: 0 0 8px rgba(159,216,176,0.2); }
+  .move.down { color: #FBC9BE; background: linear-gradient(135deg, rgba(240,160,144,0.28), rgba(240,160,144,0.1)); box-shadow: 0 0 8px rgba(240,160,144,0.15); }
+
+  .movement-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .snapshot-note {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    color: var(--chalk-dim);
+    opacity: 0.55;
+    text-align: center;
+    margin-top: 26px;
+    line-height: 1.6;
+  }
+
+  /* Small underlined text-link button style, shared by "forget keys" etc. */
+  .public-toggle {
+    background: transparent;
+    border: none;
+    color: var(--chalk-dim);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .public-toggle:hover { color: var(--gold); }
+
+  /* EFFICIENCY PANEL */
+  .efficiency-panel {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(245,241,230,0.15);
+  }
+  .efficiency-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--chalk-dim);
+    margin-bottom: 8px;
+  }
+  .efficiency-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .efficiency-team {
+    background: rgba(15,42,31,0.55);
+    border-radius: 4px;
+    padding: 8px 10px;
+  }
+  .efficiency-team .name {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 6px;
+    color: var(--chalk);
+  }
+  .efficiency-team .stat-line {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--chalk-dim);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2px;
+  }
+  .efficiency-team .stat-line span:last-child { color: var(--chalk); }
+  .efficiency-missing {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--chalk-dim);
+    opacity: 0.65;
+    line-height: 1.5;
+  }
+
+  .model-total-note {
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: rgba(212,162,76,0.08);
+    border: 1px dashed rgba(212,162,76,0.35);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    line-height: 1.6;
+    color: var(--chalk-dim);
+  }
+  .model-total-note strong { color: var(--gold); }
+
+  .model-spread-note {
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: rgba(245,241,230,0.03);
+    border: 1px dashed rgba(245,241,230,0.15);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.6;
+    color: var(--chalk-dim);
+    opacity: 0.75;
+  }
+  .model-spread-note strong { color: var(--chalk-dim); opacity: 1; }
+
+  .tag-caveat { opacity: 0.7; }
+  .tag-caveat a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+  .tag-caveat a:hover { color: var(--gold); }
+
+  .disagreement-label {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+  .disagreement-label strong { color: var(--gold); }
+
+  .low-confidence-banner {
+    margin-top: 6px;
+    padding: 5px 8px;
+    background: rgba(193,80,46,0.14);
+    border: 1px solid rgba(193,80,46,0.4);
+    border-radius: 4px;
+    color: #FBC9BE;
+    opacity: 1;
+    line-height: 1.5;
+  }
+
+  /* MARKET ACTIVITY (Market Signal Engine, Phase 2) */
+  .market-activity {
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: rgba(15,42,31,0.4);
+    border: 1px dashed rgba(245,241,230,0.15);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    line-height: 1.7;
+    color: var(--chalk-dim);
+  }
+  .market-activity-title {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--chalk-dim);
+    opacity: 0.8;
+    margin-bottom: 4px;
+  }
+  .market-row { display: flex; justify-content: space-between; gap: 8px; }
+  .market-row .lbl { opacity: 0.75; }
+  .market-windows { justify-content: flex-start; gap: 14px; flex-wrap: wrap; }
+  .market-window { white-space: nowrap; }
+  .market-window .na { opacity: 0.5; }
+  .market-window .flat { opacity: 0.6; }
+  .market-row-note { margin-top: 4px; opacity: 0.55; font-size: 9.5px; line-height: 1.5; }
+
+  .empty-state, .loading-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--chalk-dim);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+  .loading-state .spinner {
+    width: 28px; height: 28px;
+    border: 3px solid rgba(245,241,230,0.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    margin: 0 auto 14px;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 520px) {
+    .odds-row { grid-template-columns: 1fr; }
+    .matchup { font-size: 16px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loading-state .spinner { animation: none; }
+  }
+
+  /* SIDEBAR MENU + SIDE PANELS (Bet Tracker / Model Backtest Log / Field Guide) */
+  .sidebar-menu {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 70;
+  }
+  .sidebar-menu-toggle {
+    background: var(--navy);
+    border: 1px solid rgba(212,162,76,0.4);
+    color: var(--gold);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 9px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .sidebar-menu-toggle:hover { background: rgba(212,162,76,0.12); }
+
+  .sidebar-dropdown {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 220px;
+    background: var(--navy);
+    border: 1px solid rgba(212,162,76,0.4);
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.4);
+  }
+  .sidebar-dropdown.open { display: flex; }
+  .sidebar-dropdown-item {
+    background: transparent;
+    border: none;
+    border-top: 1px solid rgba(245,241,230,0.08);
+    text-align: left;
+    color: var(--chalk);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    padding: 11px 16px;
+    cursor: pointer;
+  }
+  .sidebar-dropdown-item:first-child { border-top: none; }
+  .sidebar-dropdown-item:hover { background: rgba(212,162,76,0.14); color: var(--gold); }
+
+  .side-panel {
+    position: fixed;
+    top: 0;
+    right: -380px;
+    width: 360px;
+    max-width: 90vw;
+    height: 100vh;
+    background: var(--turf-dark);
+    border-left: 1px solid rgba(245,241,230,0.15);
+    box-shadow: -8px 0 24px rgba(0,0,0,0.35);
+    z-index: 60;
+    transition: right 0.25s ease;
+    overflow-y: auto;
+    padding: 20px 18px 40px;
+  }
+  .side-panel.open { right: 0; }
+
+  .side-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .side-panel-header h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 22px;
+    color: var(--gold);
+    margin: 0;
+  }
+  .side-panel-close {
+    background: transparent;
+    border: none;
+    color: var(--chalk-dim);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  .side-panel-close:hover { color: var(--chalk); }
+
+  .bet-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed rgba(245,241,230,0.15);
+    margin-bottom: 16px;
+  }
+  .bet-form label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    color: var(--chalk-dim);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    display: block;
+  }
+  .bet-form input, .bet-form select, .bet-form textarea {
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid rgba(245,241,230,0.2);
+    color: var(--chalk);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 7px 9px;
+    border-radius: 4px;
+    outline: none;
+  }
+  .bet-form textarea { resize: vertical; }
+  .bet-form input:focus, .bet-form select:focus, .bet-form textarea:focus { border-color: var(--gold); }
+  .bet-form button {
+    margin-top: 4px;
+    background: var(--rust);
+    color: var(--chalk);
+    border: none;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 9px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .bet-form button:hover { background: #A8442A; }
+
+  /* Each bettor gets their own card - record, streak, and trend are never merged
+     across bettors, per explicit instruction. Cards stack vertically (panel is only
+     360px wide) but each is self-contained for easy side-by-side comparison while
+     scrolling. */
+  .bettor-card {
+    background: linear-gradient(165deg, var(--card-bg) 0%, var(--turf-dark) 130%);
+    border: 1px solid rgba(212,162,76,0.25);
+    border-radius: 10px;
+    padding: 14px 14px 12px;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  }
+  .bettor-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .bettor-card-name {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 19px;
+    letter-spacing: 0.3px;
+    color: var(--chalk);
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  }
+  .bettor-streak {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 4px 9px;
+    border-radius: 20px;
+    border: 1px solid transparent;
+  }
+  .bettor-streak.streak-win {
+    color: #C8F2D4;
+    background: linear-gradient(135deg, rgba(159,216,176,0.28), rgba(159,216,176,0.1));
+    border-color: rgba(159,216,176,0.4);
+    box-shadow: 0 0 10px rgba(159,216,176,0.25);
+  }
+  .bettor-streak.streak-loss {
+    color: #FBC9BE;
+    background: linear-gradient(135deg, rgba(240,160,144,0.28), rgba(240,160,144,0.1));
+    border-color: rgba(240,160,144,0.4);
+    box-shadow: 0 0 10px rgba(240,160,144,0.2);
+  }
+  .bettor-streak.streak-none { color: var(--chalk-dim); background: rgba(245,241,230,0.06); }
+
+  .bettor-card-body {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+  .bettor-ring-wrap { position: relative; flex-shrink: 0; width: 84px; height: 84px; }
+  .bettor-ring-wrap svg { transform: rotate(-90deg); }
+  .bettor-ring-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .bettor-ring-pct {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 20px;
+    color: var(--chalk);
+    line-height: 1;
+  }
+  .bettor-ring-pct-label {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    letter-spacing: 1px;
+    color: var(--chalk-dim);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .bettor-record-breakdown {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 2;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+  }
+  .bettor-record-breakdown .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .bettor-record-breakdown .dot-win { background: #9FD8B0; }
+  .bettor-record-breakdown .dot-loss { background: #F0A090; }
+  .bettor-record-breakdown .dot-push { background: var(--chalk-dim); }
+  .bettor-record-breakdown .n { color: var(--chalk); font-weight: 600; }
+  .bettor-record-breakdown .lbl { color: var(--chalk-dim); }
+
+  .trend-chart { display: block; margin-bottom: 4px; }
+  .trend-chart-label {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    color: var(--chalk-dim);
+    opacity: 0.7;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .bet-group-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--chalk-dim);
+    opacity: 0.75;
+    margin: 8px 0 6px;
+  }
+
+  .check-results-status {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--chalk-dim);
+    margin: 4px 0 12px;
+    line-height: 1.5;
+  }
+
+  /* Leaderboard shows the SAME independently-computed per-bettor numbers side by
+     side for comparison - it does not merge or pool any underlying bet data. */
+  .bet-leaderboard {
+    background: linear-gradient(165deg, var(--navy) 0%, var(--turf-dark) 140%);
+    border: 1px solid rgba(212,162,76,0.3);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  }
+  .bet-leaderboard-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 16px;
+    letter-spacing: 0.3px;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  .leaderboard-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .leaderboard-row:last-child { margin-bottom: 0; }
+  .leaderboard-rank {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(245,241,230,0.08);
+    color: var(--chalk-dim);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .leaderboard-rank.rank-1 {
+    background: linear-gradient(135deg, #E4B968, var(--gold));
+    color: var(--turf-dark);
+    box-shadow: 0 0 10px rgba(212,162,76,0.4);
+  }
+  .leaderboard-main { flex: 1; min-width: 0; }
+  .leaderboard-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 4px;
+  }
+  .leaderboard-name {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 12.5px;
+    color: var(--chalk);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .leaderboard-pct {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--chalk);
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+  .leaderboard-bar-track {
+    background: rgba(245,241,230,0.08);
+    border-radius: 4px;
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: 3px;
+  }
+  .leaderboard-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+  .leaderboard-record {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    color: var(--chalk-dim);
+    opacity: 0.75;
+  }
+  .profit-pos { color: #9FD8B0; opacity: 1; font-weight: 700; }
+  .profit-neg { color: #F0A090; opacity: 1; font-weight: 700; }
+  .net-profit { margin-top: 4px; font-size: 11px; }
+
+  .bet-entry {
+    background: var(--card-bg);
+    border-radius: 4px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+  }
+  .bet-entry .bet-entry-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .bet-entry .bet-desc { color: var(--chalk); line-height: 1.4; }
+  .bet-entry .bet-date { color: var(--chalk-dim); opacity: 0.7; font-size: 10px; margin-top: 2px; }
+  .bet-entry select {
+    background: var(--turf-dark);
+    border: 1px solid rgba(245,241,230,0.2);
+    color: var(--chalk);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    padding: 3px 5px;
+    border-radius: 3px;
+  }
+  .bet-entry select.result-win { color: #9FD8B0; }
+  .bet-entry select.result-loss { color: #F0A090; }
+  .bet-entry select.result-push { color: var(--chalk-dim); }
+  .bet-entry-delete {
+    background: transparent;
+    border: none;
+    color: var(--chalk-dim);
+    opacity: 0.6;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 0 4px;
+  }
+  .bet-entry-delete:hover { color: var(--rust); opacity: 1; }
+
+  .bet-empty {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--chalk-dim);
+    opacity: 0.6;
+    padding: 10px 0;
+  }
+
+  /* MODEL BACKTEST LOG (Phase 3) content styling — panel chrome now comes from
+     the shared .side-panel, opened via the sidebar dropdown menu. */
+  .backtest-intro {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    line-height: 1.6;
+    color: var(--chalk-dim);
+    opacity: 0.85;
+    margin-bottom: 14px;
+  }
+  .backtest-intro a { color: var(--gold); }
+
+  .backtest-section { margin-bottom: 16px; }
+  .backtest-section-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.85;
+    margin-bottom: 6px;
+  }
+  .backtest-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--chalk-dim);
+    padding: 3px 0;
+    border-bottom: 1px dashed rgba(245,241,230,0.08);
+  }
+  .backtest-row .val { color: var(--chalk); }
+  .backtest-row .val.clv-pos { color: #9FD8B0; }
+  .backtest-row .val.clv-neg { color: #F0A090; }
+  .backtest-row-note {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--chalk-dim);
+    opacity: 0.6;
+    line-height: 1.6;
+    margin-top: 10px;
+  }
+
+  /* FIELD GUIDE (Executive Summary + Glossary) panel content */
+  .fg-section-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    opacity: 0.9;
+    margin: 0 0 12px;
+  }
+  #fg-glossary .fg-section-title { margin-top: 4px; }
+  .fg-group-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--chalk-dim);
+    opacity: 0.75;
+    margin: 22px 0 10px;
+  }
+  .fg-group-title:first-of-type { margin-top: 8px; }
+  .fg-p {
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--chalk-dim);
+    margin: 0 0 12px;
+  }
+  .fg-p strong { color: var(--chalk); font-weight: 600; }
+
+  .fg-score-row {
+    background: var(--card-bg);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .fg-score-row .metric { font-family: var(--font-mono); font-size: 12px; color: var(--chalk); }
+  .fg-score-row .evidence { font-family: var(--font-body); font-size: 11px; color: var(--chalk-dim); opacity: 0.85; }
+
+  #fg-glossary dl { margin: 0; }
+  .fg-term { margin-bottom: 16px; }
+  .fg-term dt {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .fg-term dd {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: 12px;
+    color: var(--chalk-dim);
+    line-height: 1.55;
+  }
+  .fg-term dd strong { color: var(--chalk); font-weight: 600; }
+  .fg-term dd code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--navy);
+    color: var(--chalk);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  .fg-status {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 1px 7px;
+    border-radius: 20px;
+    margin-top: 4px;
+  }
+  .fg-status-noedge { color: #FBC9BE; background: rgba(193,80,46,0.25); border: 1px solid rgba(193,80,46,0.5); }
+  .fg-status-unconf { color: #F5DBA8; background: rgba(212,162,76,0.2); border: 1px solid rgba(212,162,76,0.5); }
+  .fg-status-untested { color: var(--chalk-dim); background: rgba(124,156,142,0.18); border: 1px solid rgba(124,156,142,0.45); }
+  .fg-status-notbuilt { color: var(--chalk-dim); background: transparent; border: 1px dashed rgba(201,195,178,0.4); opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<div class="sidebar-menu">
+  <button class="sidebar-menu-toggle" id="sidebarMenuToggle">&#9776; Menu</button>
+  <div class="sidebar-dropdown" id="sidebarDropdown">
+    <button type="button" class="sidebar-dropdown-item" id="menuBetTracker">Bet Tracker</button>
+    <button type="button" class="sidebar-dropdown-item" id="menuBacktestLog">Model Backtest Log</button>
+    <button type="button" class="sidebar-dropdown-item" id="menuExecSummary">Executive Summary</button>
+    <button type="button" class="sidebar-dropdown-item" id="menuGlossary">Glossary</button>
+  </div>
+</div>
+
+<div class="side-panel" id="betTrackerPanel">
+  <div class="side-panel-header">
+    <h2>Bet Tracker</h2>
+    <button class="side-panel-close" id="betTrackerClose" aria-label="Close">&times;</button>
+  </div>
+
+  <form class="bet-form" id="betForm">
+    <div>
+      <label for="betBettorInput">Bettor / Group</label>
+      <input type="text" id="betBettorInput" list="betBettorSuggestions" placeholder="e.g. Glenwood Dad Bets" required>
+      <datalist id="betBettorSuggestions">
+        <option value="Glenwood Dad Bets">
+        <option value="Rob">
+      </datalist>
+    </div>
+    <div>
+      <label for="betDescInput">Bet(s) — one per line. Add $stake at the end to track profit (odds default to -110)</label>
+      <textarea id="betDescInput" rows="4" placeholder="e.g.&#10;USC -38.5 -110 vs San Jose State $50&#10;Over 52.5 TCU vs North Carolina $25" required></textarea>
+    </div>
+    <button type="submit">+ Add Bet(s)</button>
+  </form>
+
+  <button type="button" class="public-toggle" id="checkResultsBtn" style="margin-bottom:12px;">Check results for pending bets</button>
+  <div id="checkResultsStatus" class="check-results-status"></div>
+
+  <div style="display:flex; gap:14px; margin-bottom:14px;">
+    <button type="button" class="public-toggle" id="exportBetsBtn">Export backup</button>
+    <button type="button" class="public-toggle" id="importBetsBtn">Import backup</button>
+    <input type="file" id="importBetsFile" accept="application/json" style="display:none;">
+  </div>
+
+  <div id="betRecordSummary" class="bet-record-summary"></div>
+  <div id="betList"></div>
+</div>
+
+<div class="side-panel" id="backtestPanel">
+  <div class="side-panel-header">
+    <h2>Model Backtest Log</h2>
+    <button class="side-panel-close" id="backtestClose" aria-label="Close">&times;</button>
+  </div>
+
+  <p class="backtest-intro">
+    Every game with a computable Model Disagreement gets frozen here the first time
+    it's seen — timestamp, available line, model fair line, confidence — so it can be
+    graded against the actual result without lookahead bias. Frozen entries are never
+    rewritten, only graded. See
+    <a href="NCAA_Power_Rating_Methodology.md" target="_blank" rel="noopener">methodology doc</a>.
+  </p>
+
+  <button type="button" class="public-toggle" id="gradeRecsBtn" style="margin-bottom:12px;">Grade pending recommendations</button>
+  <div id="gradeRecsStatus" class="check-results-status"></div>
+
+  <div style="display:flex; gap:14px; margin-bottom:14px;">
+    <button type="button" class="public-toggle" id="exportRecLogBtn">Export backup</button>
+    <button type="button" class="public-toggle" id="importRecLogBtn">Import backup</button>
+    <input type="file" id="importRecLogFile" accept="application/json" style="display:none;">
+  </div>
+
+  <div id="backtestStats"></div>
+</div>
+
+<div class="side-panel" id="fieldGuidePanel">
+  <div class="side-panel-header">
+    <h2>Field Guide</h2>
+    <button class="side-panel-close" id="fieldGuideClose" aria-label="Close">&times;</button>
+  </div>
+
+  <div id="fg-summary">
+    <div class="fg-section-title">Executive Summary</div>
+    <p class="fg-p">
+      Barnum &amp; Payne runs an independent power-rating model alongside the
+      live sportsbook line for every game, purely as a <strong>second
+      opinion</strong> — it is not a pick generator, and nothing is labeled a
+      proven edge until backtesting says so.
+    </p>
+    <p class="fg-p">
+      The <strong>spread model</strong> (Elo-based) has been tested five
+      independent ways across three full seasons — a fundamentals refit, naive
+      line-movement following, success/havoc-rate features, key-number
+      crossing, and cross-book dispersion. All five came back null. Five
+      methods clearing 50% by chance roughly a quarter of the time, and
+      getting a clean sweep of nulls instead, is stronger evidence than one
+      null test would be. It's shown on every card only as a transparent
+      reference, never flagged or logged as more than <strong>no proven
+      edge</strong>.
+    </p>
+    <p class="fg-p">
+      The <strong>totals model</strong> (PPA-based) found something more
+      interesting but not yet trustworthy: 53.6% against a held-out season it
+      was never fit on (n=513, 95% CI 49.3&ndash;57.9%). A follow-up check on
+      whether the market's own later action corroborates that read came back
+      unstable across seasons — doesn't overturn the result, doesn't support
+      it either. Stays <strong>unconfirmed</strong> until a second clean
+      season decides it.
+    </p>
+    <p class="fg-p">
+      Three real bugs were found and fixed along the way (a totals sign error,
+      and team-name mismatches that substituted the wrong school's data for
+      three games). One real, unfixable limitation remains: the model
+      increasingly under-predicts the market's own number as the market's
+      margin gets larger. A non-linear correction was tested and found no
+      effect — real blowouts likely get capped by backups and garbage time in
+      a way a two-number rating structurally can't see.
+    </p>
+    <p class="fg-p">
+      <strong>Model Confidence</strong> keeps a large disagreement from ever
+      being mistaken for a strong signal — it scores how much to trust the
+      inputs, completely separate from how big the gap is. Every disagreement
+      gets frozen into a backtest log the moment it's seen, graded against the
+      real result and CFBD's own closing line once the game is played.
+    </p>
+
+    <div class="fg-score-row">
+      <span class="metric">Model Spread (Elo)</span>
+      <span class="fg-status fg-status-noedge">No proven edge</span>
+      <span class="evidence">5 independent methods, 2023&ndash;2025 — 47.4&ndash;52.6% ATS, all straddling the 52.4% breakeven line.</span>
+    </div>
+    <div class="fg-score-row">
+      <span class="metric">Model Total (PPA-based)</span>
+      <span class="fg-status fg-status-unconf">Unconfirmed</span>
+      <span class="evidence">53.6% on held-out 2025 (n=513, 95% CI 49.3&ndash;57.9%). Market's own closing-line movement doesn't corroborate it.</span>
+    </div>
+    <div class="fg-score-row">
+      <span class="metric">Model Total (SP+ preseason)</span>
+      <span class="fg-status fg-status-untested">Untested</span>
+      <span class="evidence">No per-week SP+ history exists to backtest against without leaking future data into the past. Sanity-checked only.</span>
+    </div>
+    <div class="fg-score-row">
+      <span class="metric">Model Confidence</span>
+      <span class="fg-status fg-status-untested">Rule-based, not backtested</span>
+      <span class="evidence">Deducts for known data gaps. Reliable by construction, not yet proven predictive on its own.</span>
+    </div>
+    <div class="fg-score-row">
+      <span class="metric">Opportunity Score</span>
+      <span class="fg-status fg-status-notbuilt">Not built</span>
+      <span class="evidence">Deliberately deferred — weights won't be hand-assigned until real backtest volume exists.</span>
+    </div>
+  </div>
+
+  <div id="fg-glossary">
+    <div class="fg-section-title">Glossary</div>
+
+    <div class="fg-group-title">Core Model</div>
+    <dl>
+      <div class="fg-term"><dt>Model Disagreement</dt><dd>The gap between the model's projection and the current sportsbook line. Never called an "edge" or "signal" — those are reserved for something backtesting has actually confirmed.</dd></div>
+      <div class="fg-term"><dt>Model Spread <span class="fg-status fg-status-noedge">No proven edge</span></dt><dd>Elo differential converted to margin, plus home-field and rest adjustments. Reference only — never used to flag or sort.</dd></div>
+      <div class="fg-term"><dt>Model Total <span class="fg-status fg-status-unconf">Unconfirmed</span></dt><dd>League-average baseline adjusted by each team's offensive/defensive PPA, scaled by a fitted pace factor.</dd></div>
+      <div class="fg-term"><dt>Elo Rating</dt><dd>CFBD's pregame power rating. Used for the spread model because it's correct-as-of-kickoff by construction, unlike SP+.</dd></div>
+      <div class="fg-term"><dt>PPA</dt><dd><strong>Predicted Points Added</strong> — CFBD's per-play efficiency metric. Positive offensive PPA is good; positive defensive PPA means the defense allows more than average.</dd></div>
+      <div class="fg-term"><dt>SP+</dt><dd>CFBD's opponent-adjusted overall rating, split into offense/defense. Used as a preseason fallback before any PPA exists.</dd></div>
+      <div class="fg-term"><dt>Pace Factor</dt><dd>The constant converting combined PPA into points. Refit via OLS on training data only, after a guessed value produced nonsense totals.</dd></div>
+      <div class="fg-term"><dt>Baseline Total</dt><dd>The league's season-average combined score — the totals model's starting point before any team-specific adjustment.</dd></div>
+      <div class="fg-term"><dt>MODEL_FLAG_THRESHOLD</dt><dd>The disagreement size (currently 3 pts) above which a totals game gets flagged/badged. Spread is never flagged, at any size.</dd></div>
+    </dl>
+
+    <div class="fg-group-title">Confidence &amp; Reliability</div>
+    <dl>
+      <div class="fg-term"><dt>Model Confidence</dt><dd>A 0&ndash;100 score for how much to trust a game's inputs — never for how big its disagreement is. Docks points for preseason, weeks 0&ndash;3, and missing PPA/Elo data.</dd></div>
+      <div class="fg-term"><dt>Low Model Confidence banner</dt><dd>Appears below 50/100, naming the specific reasons the score was docked.</dd></div>
+      <div class="fg-term"><dt>Data reliability <em>vs.</em> predictive power</dt><dd>Two deliberately separate questions: can the inputs be trusted (confidence) vs. has this number actually beaten the market historically (the backtest).</dd></div>
+    </dl>
+
+    <div class="fg-group-title">Market Signal Engine</div>
+    <dl>
+      <div class="fg-term"><dt>Market Activity</dt><dd>The card block showing opening vs. current line, plus movement over 1H/6H/24H — built from this app's own recorded snapshots.</dd></div>
+      <div class="fg-term"><dt>Line History / Snapshot</dt><dd>Every open/refresh saves a timestamped snapshot, persisted on-device so movement survives closing the tab.</dd></div>
+      <div class="fg-term"><dt>Movement window (1H/6H/24H)</dt><dd>The nearest snapshot at or before that many hours ago. Reads <code>N/A</code> honestly if nothing that old exists yet.</dd></div>
+      <div class="fg-term"><dt><code>N/A</code> (as used here)</dt><dd>Means "not enough history yet" — never a stand-in for zero or "no movement."</dd></div>
+      <div class="fg-term"><dt>Steam move / Reverse line movement <span class="fg-status fg-status-notbuilt">Not built</span></dt><dd>Needs timestamped multi-book history and ticket/handle data this app doesn't collect today.</dd></div>
+    </dl>
+
+    <div class="fg-group-title">Backtesting &amp; Grading</div>
+    <dl>
+      <div class="fg-term"><dt>Recommendation Log</dt><dd>Every Model Disagreement, frozen the first time it's seen, so it can be graded later without lookahead bias.</dd></div>
+      <div class="fg-term"><dt>Frozen</dt><dd>A logged recommendation's original fields are never rewritten. Only the outcome gets filled in afterward, by grading.</dd></div>
+      <div class="fg-term"><dt>Grading</dt><dd>Matching a frozen entry to its completed game and checking whether the model's favored side won against the line available <em>when it was logged</em> — not the closing line.</dd></div>
+      <div class="fg-term"><dt>CLV <span style="opacity:0.7;font-weight:400;">(Closing Line Value)</span></dt><dd>Whether the closing line moved toward the model's side after logging. Positive = the market later agreed; negative = it didn't.</dd></div>
+      <div class="fg-term"><dt>ATS <span style="opacity:0.7;font-weight:400;">/ OU</span></dt><dd><strong>Against The Spread</strong> / <strong>Over-Under</strong> — shorthand for "did the favorite cover" and "did the total go over," used in every hit-rate figure.</dd></div>
+      <div class="fg-term"><dt>Push</dt><dd>The result landed exactly on the line — excluded from hit-rate math since it's not a decision either way.</dd></div>
+      <div class="fg-term"><dt>95% Confidence Interval</dt><dd>The range a hit rate could plausibly fall in given the sample size, so a small-sample percentage doesn't get mistaken for a real result.</dd></div>
+      <div class="fg-term"><dt>Train / Test Split</dt><dd>Fitting a constant only on past seasons, then checking it on a season the fit never saw — keeps a number from being quietly reverse-engineered to look good.</dd></div>
+      <div class="fg-term"><dt>Lookahead Bias</dt><dd>Letting information from after a game (or season) leak into a projection that's supposed to be as-of-kickoff. The reason Elo replaced SP+ for the spread backtest.</dd></div>
+      <div class="fg-term"><dt>Opportunity Score <span class="fg-status fg-status-notbuilt">Not built</span></dt><dd>A future composite of disagreement, confidence, market signal, and price quality. Left unweighted until real graded volume exists to fit it empirically.</dd></div>
+    </dl>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="masthead">
+    <h1>Barnum & Payme</h1>
+    <div class="sub">NCAA Football · Live Lines</div>
+  </div>
+
+  <div class="hash-divider">
+    <div class="line"></div>
+    <div class="label">Week Odds</div>
+    <div class="tick"></div><div class="tick long"></div><div class="tick"></div>
+  </div>
+
+  <div class="key-panel" id="keyPanel">
+    <h2>Connect your odds feed</h2>
+    <p>
+      This board pulls live spreads, totals, and moneylines from
+      <a href="https://the-odds-api.com" target="_blank" rel="noopener">The Odds API</a>.
+      Sign up for a free key, then paste it below — it's saved only in this browser's
+      local storage on this device (never sent anywhere but the odds API), so you won't
+      need to re-enter it next time. You can clear it anytime below.
+    </p>
+    <div class="key-row">
+      <input type="text" id="apiKeyInput" placeholder="Paste your Odds API key here" autocomplete="off" spellcheck="false">
+      <button id="loadBtn">Load the slate</button>
+    </div>
+
+    <div class="cfbd-block">
+      <div class="cfbd-hint">
+        Optional — add a free key from <a href="https://collegefootballdata.com" target="_blank" rel="noopener">CollegeFootballData.com</a>
+        to pull in team efficiency (PPA) and SP+ ratings alongside the lines. Skip this for now and add it later;
+        the dashboard works fine without it.
+      </div>
+      <div class="key-row">
+        <input type="text" id="cfbdKeyInput" placeholder="Paste your CFBD API key here (optional)" autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+
+    <div class="status-line" id="statusLine"></div>
+    <button class="public-toggle" id="forgetKeysBtn" style="display:none; margin-top:8px;">Forget saved keys on this device</button>
+  </div>
+
+  <div class="controls" id="controls" style="display:none;">
+    <div>
+      <div class="count" id="gameCount"></div>
+      <div class="count" id="modelFlagCount" style="margin-top:4px;"></div>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="refresh-btn" id="sortTotalBtn">Sort by total difference</button>
+      <button class="refresh-btn" id="sortSpreadBtn" title="Sorts by a model tested 5 ways with no proven edge — see the methodology doc">Sort by spread difference</button>
+      <button class="refresh-btn" id="refreshBtn">↻ Refresh lines</button>
+    </div>
+  </div>
+
+  <div class="games" id="games"></div>
+
+  <div class="snapshot-note" id="snapshotNote" style="display:none;">
+    Line history is saved on this device across visits —<br>
+    open/refresh periodically through the week to build a real opening-to-current picture.
+  </div>
+
+</div>
+
+<script>
+  const SPORT_KEY = 'americanfootball_ncaaf';
+  const CFBD_YEAR = new Date().getMonth() >= 6 ? new Date().getFullYear() : new Date().getFullYear() - 1;
+  const STORAGE_KEY_ODDS = 'cfbSlate_oddsApiKey';
+  const STORAGE_KEY_CFBD = 'cfbSlate_cfbdApiKey';
+  // Baked-in fallback keys so the slate loads without any input, even if this
+  // browser's localStorage doesn't persist across sessions (private mode,
+  // "clear on exit" settings, etc). Overridden by whatever is saved in localStorage.
+  const DEFAULT_ODDS_KEY = '46906b100a27aaf8b604c686646f5844';
+  const DEFAULT_CFBD_KEY = 'cfteKGj5ZLY7fPwRIVYKfc727vc1YMxtsgHWPxm6DAIF0sZCJsjFZXhl5s4Pw44G';
+  const keyPanel = document.getElementById('keyPanel');
+  const apiKeyInput = document.getElementById('apiKeyInput');
+  const cfbdKeyInput = document.getElementById('cfbdKeyInput');
+  const loadBtn = document.getElementById('loadBtn');
+  const statusLine = document.getElementById('statusLine');
+  const forgetKeysBtn = document.getElementById('forgetKeysBtn');
+  const sidebarMenuToggle = document.getElementById('sidebarMenuToggle');
+  const sidebarDropdown = document.getElementById('sidebarDropdown');
+  const menuBetTracker = document.getElementById('menuBetTracker');
+  const menuBacktestLog = document.getElementById('menuBacktestLog');
+  const menuExecSummary = document.getElementById('menuExecSummary');
+  const menuGlossary = document.getElementById('menuGlossary');
+  const fieldGuidePanel = document.getElementById('fieldGuidePanel');
+  const fieldGuideClose = document.getElementById('fieldGuideClose');
+  const betTrackerPanel = document.getElementById('betTrackerPanel');
+  const betTrackerClose = document.getElementById('betTrackerClose');
+  const betForm = document.getElementById('betForm');
+  const betBettorInput = document.getElementById('betBettorInput');
+  const betDescInput = document.getElementById('betDescInput');
+  const betRecordSummary = document.getElementById('betRecordSummary');
+  const betList = document.getElementById('betList');
+  const checkResultsBtn = document.getElementById('checkResultsBtn');
+  const backtestPanel = document.getElementById('backtestPanel');
+  const backtestClose = document.getElementById('backtestClose');
+  const gradeRecsBtn = document.getElementById('gradeRecsBtn');
+  const gradeRecsStatus = document.getElementById('gradeRecsStatus');
+  const exportRecLogBtn = document.getElementById('exportRecLogBtn');
+  const importRecLogBtn = document.getElementById('importRecLogBtn');
+  const importRecLogFile = document.getElementById('importRecLogFile');
+  const backtestStats = document.getElementById('backtestStats');
+  const checkResultsStatus = document.getElementById('checkResultsStatus');
+  const exportBetsBtn = document.getElementById('exportBetsBtn');
+  const importBetsBtn = document.getElementById('importBetsBtn');
+  const importBetsFile = document.getElementById('importBetsFile');
+  const controls = document.getElementById('controls');
+  const refreshBtn = document.getElementById('refreshBtn');
+  const sortTotalBtn = document.getElementById('sortTotalBtn');
+  const sortSpreadBtn = document.getElementById('sortSpreadBtn');
+  const gamesEl = document.getElementById('games');
+  const gameCount = document.getElementById('gameCount');
+  const modelFlagCount = document.getElementById('modelFlagCount');
+  const snapshotNote = document.getElementById('snapshotNote');
+
+  let sessionApiKey = '';
+  let sessionCfbdKey = '';
+  let lastEvents = null;
+  let lastPrepared = null;
+  let sortByTotalDiff = false;
+  let sortBySpreadDiff = false;
+  // Team name -> { offPPA, defPPA, spOverall, spOffense, spDefense }
+  let efficiencyMap = {};
+  // Model total inputs — see NCAA_Power_Rating_Methodology.md. PACE_FACTOR was fit via
+  // OLS on 2023-2024 CFBD data, validated out-of-sample on held-out 2025 (53.6% hit
+  // rate, n=513, 95% CI 49.3-57.9% — a promising but NOT statistically confirmed edge).
+  // The spread half of that methodology found zero edge (49.6-50.2%, flat across three
+  // seasons) and is intentionally not surfaced here at all.
+  const PACE_FACTOR = 1.23;
+  let baselineTotal = null;
+
+  // Manual bet log — persisted in localStorage, same pattern as the saved API keys.
+  // Purely a personal record (bettor, description, result); nothing here is auto-graded
+  // against CFBD results, since these can be any bet (e.g. a friend-group pool), not
+  // necessarily tied to a specific tracked CFB game.
+  const STORAGE_KEY_BETLOG = 'cfbSlate_betLog';
+  const STORAGE_KEY_LINEHISTORY = 'cfbSlate_lineHistory';
+  const STORAGE_KEY_RECLOG = 'cfbSlate_recommendationLog';
+  // Frozen model-recommendation log (Phase 3 backtesting) — one entry per (gameId,
+  // market), written once on first sight and never rewritten except by grading (result/
+  // closingLine/clv fields only). See logRecommendation and gradeRecommendations.
+  let recommendationLog = [];
+  let betLog = [];
+
+  // Spread model — tested THREE independent ways (Elo power rating, line movement,
+  // success/havoc rate) across 2,264+ games, 2023-2025. NONE found a real edge
+  // (~50% ATS every time, stable-to-unstable in ways that argue against a real
+  // effect). This is NOT flagged, badged, or sortable like the totals signal —
+  // it is shown for reference only. See NCAA_Power_Rating_Methodology.md.
+  const SPREAD_HOME_FIELD_ADJ = 3.5;
+  const SPREAD_ELO_PER_MARGIN = 23.86;
+  const SPREAD_REST_SHORT_DAYS = 7;
+  const SPREAD_REST_BYE_DAYS = 13;
+  const SPREAD_REST_ADJ = 1.0;
+  let eloMap = {};
+  let lastPlayedMap = {};
+  // For Model Confidence scoring only (see computeModelConfidence). Keyed by
+  // "homeSchool|awaySchool" -> CFBD week number; and school -> completed-games-so-far
+  // count. Both built from the same /games fetch loadEloAndRest already makes, so no
+  // extra API call is needed.
+  let weekMap = {};
+  let gamesPlayedMap = {};
+  // Persisted line history (Market Signal Engine, Phase 2): { [eventId]: [{ time,
+  // spreadHome, total, mlHome, mlAway }, ...] }. Sampled opportunistically whenever
+  // the dashboard is opened/refreshed - there's no backend or scheduler to poll while
+  // the tab is closed, so movement/velocity signals are only as fine-grained as how
+  // often this is actually open. Fields the sample gaps can't support (steam detection,
+  // sub-hour velocity) honestly read N/A rather than being estimated. See
+  // NCAA_Power_Rating_Methodology.md, "Barnum & Payne architecture upgrade."
+  let lineHistory = {};
+  const LINE_HISTORY_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000; // prune entries untouched for 2+ weeks
+  const LINE_HISTORY_MIN_GAP_MS = 5 * 60 * 1000; // dedupe rapid-refresh spam, not genuine re-checks
+  // Team name -> AP rank (best-effort, from ESPN's public rankings endpoint)
+  let rankMap = {};
+
+  async function loadEfficiencyData() {
+    if (!sessionCfbdKey) return;
+
+    const headers = { 'Authorization': 'Bearer ' + sessionCfbdKey };
+    const map = {};
+
+    try {
+      const [ppaRes, spRes] = await Promise.all([
+        fetch(`https://api.collegefootballdata.com/ppa/teams?year=${CFBD_YEAR}`, { headers }),
+        fetch(`https://api.collegefootballdata.com/ratings/sp?year=${CFBD_YEAR}`, { headers })
+      ]);
+
+      if (ppaRes.ok) {
+        const ppaData = await ppaRes.json();
+        ppaData.forEach(t => {
+          map[t.team] = map[t.team] || {};
+          map[t.team].offPPA = t.offense ? t.offense.overall : null;
+          map[t.team].defPPA = t.defense ? t.defense.overall : null;
+        });
+      }
+
+      if (spRes.ok) {
+        const spData = await spRes.json();
+        spData.forEach(t => {
+          map[t.team] = map[t.team] || {};
+          map[t.team].spOverall = t.rating;
+          map[t.team].spOffense = t.offense ? t.offense.rating : null;
+          map[t.team].spDefense = t.defense ? t.defense.rating : null;
+        });
+      }
+
+      efficiencyMap = map;
+    } catch (e) {
+      // Efficiency data is a bonus layer — odds still load fine without it
+      efficiencyMap = {};
+    }
+  }
+
+  async function loadBaselineTotal() {
+    if (!sessionCfbdKey) return;
+    const headers = { 'Authorization': 'Bearer ' + sessionCfbdKey };
+
+    async function seasonAverage(year) {
+      const res = await fetch(`https://api.collegefootballdata.com/games?year=${year}&seasonType=regular&classification=fbs`, { headers });
+      if (!res.ok) return null;
+      const games = await res.json();
+      const played = games.filter(g => g.completed && g.homePoints != null && g.awayPoints != null);
+      if (played.length === 0) return null;
+      const sum = played.reduce((acc, g) => acc + g.homePoints + g.awayPoints, 0);
+      return sum / played.length;
+    }
+
+    try {
+      baselineTotal = await seasonAverage(CFBD_YEAR);
+      if (baselineTotal === null) baselineTotal = await seasonAverage(CFBD_YEAR - 1);
+    } catch (e) {
+      // Baseline is a bonus layer for the model-total note — odds still load fine without it
+      baselineTotal = null;
+    }
+  }
+
+  async function loadAllTeamNames() {
+    if (!sessionCfbdKey) return;
+    try {
+      const res = await fetch(`https://api.collegefootballdata.com/teams?year=${CFBD_YEAR}`, {
+        headers: { 'Authorization': 'Bearer ' + sessionCfbdKey }
+      });
+      if (!res.ok) return;
+      const teams = await res.json();
+      allTeamNames = teams.map(t => t.school).filter(Boolean);
+    } catch (e) {
+      // Used only to disambiguate short-name collisions (e.g. "Indiana" vs "Indiana State") -
+      // matching still falls back to the old behavior without it, just re-exposed to that risk.
+      allTeamNames = [];
+    }
+  }
+
+  // Elo pregame rating (carried forward season-to-season by CFBD, so it's already
+  // populated even for not-yet-played games) and each team's most recent completed
+  // game date (for the rest-days input). Both needed for the research-only spread
+  // note — see NCAA_Power_Rating_Methodology.md's "no proven edge" finding.
+  async function loadEloAndRest() {
+    if (!sessionCfbdKey) return;
+    const headers = { 'Authorization': 'Bearer ' + sessionCfbdKey };
+    try {
+      const res = await fetch(`https://api.collegefootballdata.com/games?year=${CFBD_YEAR}&seasonType=regular&classification=fbs`, { headers });
+      if (!res.ok) return;
+      const games = await res.json();
+      games.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+
+      const elo = {};
+      const lastPlayed = {};
+      const week = {};
+      const gamesPlayed = {};
+      games.forEach(g => {
+        if (elo[g.homeTeam] === undefined && g.homePregameElo != null) elo[g.homeTeam] = g.homePregameElo;
+        if (elo[g.awayTeam] === undefined && g.awayPregameElo != null) elo[g.awayTeam] = g.awayPregameElo;
+        if (g.week != null) week[g.homeTeam + '|' + g.awayTeam] = g.week;
+        if (g.completed && g.homePoints != null) {
+          lastPlayed[g.homeTeam] = g.startDate;
+          lastPlayed[g.awayTeam] = g.startDate;
+          gamesPlayed[g.homeTeam] = (gamesPlayed[g.homeTeam] || 0) + 1;
+          gamesPlayed[g.awayTeam] = (gamesPlayed[g.awayTeam] || 0) + 1;
+        }
+      });
+      eloMap = elo;
+      lastPlayedMap = lastPlayed;
+      weekMap = week;
+      gamesPlayedMap = gamesPlayed;
+    } catch (e) {
+      // Spread note is a bonus layer — odds still load fine without it
+      eloMap = {};
+      lastPlayedMap = {};
+      weekMap = {};
+      gamesPlayedMap = {};
+    }
+  }
+
+  // CFBD identifies teams by school name only (e.g. "Ohio State"), while the odds
+  // feed uses the full "school + mascot" name (e.g. "Ohio State Buckeyes"). Match by
+  // longest school-name prefix so e.g. "Texas A&M" isn't mismatched to "Texas".
+  // Bidirectional pairs for schools where CFBD's name and the odds feed's name don't
+  // share a text prefix in EITHER direction — confirmed against CFBD's /teams list
+  // (all divisions), not guessed. Without these, e.g. "Houston Baptist Huskies" (the
+  // odds feed's name; the school renamed to Houston Christian in 2022 and CFBD only
+  // knows the new name) would silently match the unrelated University of Houston
+  // instead of correctly finding no data - a real bug this shipped with once already.
+  const TEAM_NAME_ALIASES = [
+    ['appalachian state', 'app state'],
+    ['southern mississippi', 'southern miss'],
+    ['houston baptist', 'houston christian'],   // renamed 2022; odds feeds lag the rename
+    ['umass', 'massachusetts'],
+    ['albany', 'ualbany'],
+    ['liu', 'long island university'],
+    ['citadel', 'the citadel'],
+    ['southeastern louisiana', 'se louisiana'],
+    ['youngstown st', 'youngstown state']
+  ];
+
+  function aliasFor(normalizedName) {
+    for (const [a, b] of TEAM_NAME_ALIASES) {
+      if (normalizedName === a) return b;
+      if (normalizedName === b) return a;
+    }
+    return null;
+  }
+
+  // Strips diacritics/apostrophes (CFBD spells some schools "San José State", "Hawai'i")
+  // so matching isn't broken by characters the odds feed's plain-ASCII names don't have.
+  function normalizeTeamName(s) {
+    return s.normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')          // strip diacritic marks: San José -> San Jose
+      .replace(/-/g, ' ')              // hyphens separate words: Arkansas-Pine Bluff -> Arkansas Pine Bluff
+      .replace(/[^a-zA-Z0-9 ]/g, '')   // drop other punctuation without adding a break: Hawai'i -> Hawaii
+      .replace(/\s+/g, ' ')
+      .toLowerCase()
+      .trim();
+  }
+
+  // Every school CFBD knows about, across ALL divisions (loaded once via loadAllTeamNames).
+  // Needed to correctly resolve names like "Indiana State Sycamores": matching only against
+  // eloMap/efficiencyMap (which only has data for FBS teams) would silently fall back to the
+  // wrong, unrelated school "Indiana" (FBS, real Elo 2064) since "Indiana State" is a valid
+  // prefix match and Indiana State itself (FCS) has no data - this shipped once already and
+  // produced a 63-point spread error (model said Purdue +27.8, market said Purdue -35.5).
+  let allTeamNames = [];
+
+  function findBestPrefixMatch(candidateNames, fullTeamName) {
+    const normFull = normalizeTeamName(fullTeamName);
+    let bestMatch = null;
+    let bestMatchLen = -1;
+    for (const cfbdName of candidateNames) {
+      const candidate = normalizeTeamName(cfbdName);
+      const alias = aliasFor(candidate);
+      const variants = alias ? [candidate, alias] : [candidate];
+      for (const variant of variants) {
+        if ((normFull.startsWith(variant + ' ') || normFull === variant) && variant.length > bestMatchLen) {
+          bestMatch = cfbdName;
+          bestMatchLen = variant.length;
+        }
+      }
+    }
+    return bestMatch;
+  }
+
+  function matchTeamKey(map, fullTeamName) {
+    if (map[fullTeamName] !== undefined) return map[fullTeamName];
+
+    if (allTeamNames.length > 0) {
+      // Resolve against the full ~700-school universe FIRST. If the correctly-resolved
+      // school has no data in `map`, return null honestly instead of substituting a
+      // different school's real numbers.
+      const canonical = findBestPrefixMatch(allTeamNames, fullTeamName);
+      if (canonical !== null) return map[canonical] !== undefined ? map[canonical] : null;
+    }
+
+    // Fallback for when the full team-name reference hasn't loaded yet (or found no match
+    // at all, e.g. a program CFBD doesn't track anywhere) - match directly against map's
+    // own keys. Carries the original collision risk, but only applies when we can't do better.
+    const bestMatch = findBestPrefixMatch(Object.keys(map), fullTeamName);
+    return bestMatch !== null ? map[bestMatch] : null;
+  }
+
+  function lookupEfficiency(fullTeamName) {
+    return matchTeamKey(efficiencyMap, fullTeamName);
+  }
+
+  function resolveCanonicalTeamName(fullTeamName) {
+    if (!allTeamNames.length) return null;
+    return findBestPrefixMatch(allTeamNames, fullTeamName);
+  }
+
+  // Model Confidence — how much to trust the underlying inputs, NOT how big the
+  // model/market disagreement is. Per the Barnum & Payne architecture: a large
+  // disagreement built on missing or unreliable inputs must score LOWER confidence,
+  // never higher, so a big gap never masquerades as a strong signal on its own.
+  // Deliberately rule-based and conservative (deduct from 100) rather than fit to
+  // any outcome — this scores DATA RELIABILITY, not backtested predictive power.
+  //
+  // Only scores what's actually computable today from data already loaded. Several
+  // factors the full architecture calls for — starting-QB uncertainty, injury
+  // reports, coaching-staff turnover, transfer-portal roster churn — have no wired
+  // data source yet and are deliberately NOT scored (silently treating them as "fine"
+  // would be worse than leaving them out; see reasons list, which stays honest about
+  // what was and wasn't checked).
+  function resolveGameWeek(homeTeamName, awayTeamName) {
+    const homeCanon = resolveCanonicalTeamName(homeTeamName);
+    const awayCanon = resolveCanonicalTeamName(awayTeamName);
+    return (homeCanon && awayCanon) ? weekMap[homeCanon + '|' + awayCanon] : undefined;
+  }
+
+  function computeModelConfidence(homeTeamName, awayTeamName) {
+    let score = 100;
+    const reasons = [];
+
+    const week = resolveGameWeek(homeTeamName, awayTeamName);
+
+    if (week === undefined) {
+      score -= 30;
+      reasons.push('Game week could not be matched to CFBD schedule data');
+    } else if (week <= 0) {
+      score -= 35;
+      reasons.push('Preseason — no current-season games played yet');
+    } else if (week <= 3) {
+      score -= 20;
+      reasons.push(`Week ${week} — small current-season sample`);
+    }
+
+    const homeEff = lookupEfficiency(homeTeamName);
+    const awayEff = lookupEfficiency(awayTeamName);
+    if (!homeEff || homeEff.offPPA == null || !awayEff || awayEff.offPPA == null) {
+      score -= 40;
+      reasons.push('Missing offensive/defensive efficiency data for one or both teams');
+    }
+
+    const homeElo = matchTeamKey(eloMap, homeTeamName);
+    const awayElo = matchTeamKey(eloMap, awayTeamName);
+    if (homeElo == null || awayElo == null) {
+      score -= 25;
+      reasons.push('Missing historical rating data for one or both teams (FCS opponent or new program)');
+    }
+
+    score = Math.max(0, Math.min(100, score));
+    return { score, reasons };
+  }
+
+  // Research-only spread model. See NCAA_Power_Rating_Methodology.md's spread-edge-
+  // search section — tested 3 independent ways, none found a real edge. This function
+  // exists only to show the number transparently; it must never feed into flagging,
+  // badging, or sorting the way computeModelTotal does.
+  function computeModelSpread(homeTeamName, awayTeamName, kickoffIso) {
+    const homeElo = matchTeamKey(eloMap, homeTeamName);
+    const awayElo = matchTeamKey(eloMap, awayTeamName);
+    if (homeElo == null || awayElo == null) return null;
+
+    const homeLast = matchTeamKey(lastPlayedMap, homeTeamName);
+    const awayLast = matchTeamKey(lastPlayedMap, awayTeamName);
+    let restAdj = 0;
+    if (homeLast && awayLast && kickoffIso) {
+      const kickoff = new Date(kickoffIso);
+      const homeRestDays = Math.round((kickoff - new Date(homeLast)) / 86400000);
+      const awayRestDays = Math.round((kickoff - new Date(awayLast)) / 86400000);
+      if (homeRestDays < SPREAD_REST_SHORT_DAYS && awayRestDays >= SPREAD_REST_BYE_DAYS) restAdj = -SPREAD_REST_ADJ;
+      else if (awayRestDays < SPREAD_REST_SHORT_DAYS && homeRestDays >= SPREAD_REST_BYE_DAYS) restAdj = SPREAD_REST_ADJ;
+    }
+
+    const eloDiff = homeElo - awayElo;
+    const rawEdge = (eloDiff / SPREAD_ELO_PER_MARGIN) + SPREAD_HOME_FIELD_ADJ + restAdj;
+    const modelSpread = -1 * rawEdge; // market convention: negative = home favored
+    return { modelSpread };
+  }
+
+  function modelSpreadNote(result, marketSpreadHome, homeAbbr, awayAbbr, confidence) {
+    if (!result || typeof marketSpreadHome !== 'number' || isNaN(marketSpreadHome)) return '';
+    const fmtSpread = (n) => (n > 0 ? '+' : '') + n.toFixed(1);
+    // gap = model - market. Negative gap => model favors home MORE than the market does
+    // (more negative = bigger favorite, in spread convention). Positive gap => model
+    // favors the away side more than the market does.
+    const gap = result.modelSpread - marketSpreadHome;
+    const favors = gap < 0 ? homeAbbr : awayAbbr;
+    return `
+      <div class="model-spread-note">
+        <div class="disagreement-label">MODEL DISAGREEMENT: <strong>${favors} ${fmtSpread(Math.abs(gap))}</strong></div>
+        <div>Model: ${homeAbbr} ${fmtSpread(result.modelSpread)} &nbsp;|&nbsp; Market: ${homeAbbr} ${fmtSpread(marketSpreadHome)}</div>
+        ${confidenceLine(confidence)}
+        <span class="tag-caveat">(no proven edge — <a href="NCAA_Power_Rating_Methodology.md" target="_blank" rel="noopener">methodology doc</a>)</span>
+      </div>
+    `;
+  }
+
+  // Model Confidence line + low-confidence warning, shared by the spread and total
+  // notes. Confidence describes how much to trust the INPUTS, independent of the
+  // disagreement's size — a big gap on unreliable inputs must never read as a
+  // strong signal. See computeModelConfidence.
+  function confidenceLine(confidence) {
+    if (!confidence) return '';
+    const warn = confidence.score < 50
+      ? `<div class="low-confidence-banner">&#9888; LOW MODEL CONFIDENCE — large disagreement may reflect incomplete or unreliable model inputs${confidence.reasons.length ? ' (' + confidence.reasons.join('; ') + ')' : ''}.</div>`
+      : '';
+    return `<div>Model Confidence: <strong>${confidence.score}/100</strong></div>${warn}`;
+  }
+
+  // Preseason-available totals estimate, using SP+ offense/defense sub-ratings instead of
+  // PPA (which requires games to have been played and doesn't exist yet in the preseason).
+  // UNLIKE the PPA-based model total below, this has NEVER been backtested — CFBD's SP+ has
+  // no historical per-week snapshot (same reason the spread model had to substitute Elo), so
+  // testing this against 2023-2025 games would leak future-season information into the past,
+  // the exact lookahead bug already caught once. Only a sanity check was possible (does the
+  // formula produce plausible totals on in-sample 2024 data): range 26-81, avg 53.3 vs actual
+  // avg 53.4 - sane, but "sane" is not "validated." Treat this as weaker evidence than even
+  // the tested-and-null spread model, not stronger.
+  //
+  // Derivation: CFBD's offense.rating / defense.rating are already point-denominated (unlike
+  // PPA's per-play units), roughly "expected points this unit contributes vs an average
+  // opponent." Combining two opponent-adjusted absolute figures requires removing one shared
+  // "average" baseline (each side's rating already embeds it once):
+  //   home_points = home_offense_rating + away_defense_rating - (baselineTotal / 2)
+  //   away_points = away_offense_rating + home_defense_rating - (baselineTotal / 2)
+  //   total = sum of both = all four ratings - baselineTotal
+  function computeModelTotalSP(home, away) {
+    if (!home || !away || baselineTotal === null) return null;
+    if (home.spOffense == null || home.spDefense == null || away.spOffense == null || away.spDefense == null) return null;
+    const modelTotal = (home.spOffense + away.spDefense + away.spOffense + home.spDefense) - baselineTotal;
+    return { modelTotal };
+  }
+
+  function modelTotalSPNote(result, marketTotal, confidence) {
+    if (!result || typeof marketTotal !== 'number' || isNaN(marketTotal)) return '';
+    const gap = result.modelTotal - marketTotal;
+    const dir = gap > 0 ? 'OVER' : 'UNDER';
+    return `
+      <div class="model-spread-note">
+        <div class="disagreement-label">MODEL DISAGREEMENT (preseason): <strong>${dir} ${Math.abs(gap).toFixed(1)}</strong></div>
+        <div>Model: ${result.modelTotal.toFixed(1)} &nbsp;|&nbsp; Market: ${marketTotal}</div>
+        ${confidenceLine(confidence)}
+        <span class="tag-caveat">(untested — <a href="NCAA_Power_Rating_Methodology.md" target="_blank" rel="noopener">methodology doc</a>)</span>
+      </div>
+    `;
+  }
+
+  // Research-only model total. See NCAA_Power_Rating_Methodology.md — this is NOT a
+  // confirmed edge (2025 held-out backtest: 53.6% hit rate, n=513, 95% CI 49.3-57.9%,
+  // which still dips below 50%). Deliberately labeled "Model Disagreement," never
+  // "edge" or "signal" — those terms are reserved for a backtested market-behavior
+  // read this app doesn't have yet (see Barnum & Payne architecture notes).
+  const MODEL_FLAG_THRESHOLD = 3; // pts — matches the disagreement threshold reported in the backtest
+
+  function computeModelTotal(home, away, marketTotal) {
+    if (typeof marketTotal !== 'number' || isNaN(marketTotal)) return null;
+    if (!home || !away || baselineTotal === null) return null;
+    if (home.offPPA == null || home.defPPA == null || away.offPPA == null || away.defPPA == null) return null;
+
+    const modelTotal = baselineTotal
+      + PACE_FACTOR * (home.offPPA + away.defPPA)
+      + PACE_FACTOR * (away.offPPA + home.defPPA);
+    const gap = modelTotal - marketTotal;
+    return { modelTotal, gap, dir: gap > 0 ? 'OVER' : 'UNDER' };
+  }
+
+  function modelTotalNote(result, marketTotal, confidence) {
+    if (!result) return '';
+    return `
+      <div class="model-total-note">
+        <div class="disagreement-label">MODEL DISAGREEMENT: <strong>${result.dir} ${Math.abs(result.gap).toFixed(1)}</strong></div>
+        <div>Model: ${result.modelTotal.toFixed(1)} &nbsp;|&nbsp; Market: ${marketTotal}</div>
+        ${confidenceLine(confidence)}
+        <span class="tag-caveat">(unconfirmed — <a href="NCAA_Power_Rating_Methodology.md" target="_blank" rel="noopener">methodology doc</a>)</span>
+      </div>
+    `;
+  }
+
+  function efficiencyPanel(homeTeam, awayTeam, marketTotal, modelResult, confidence) {
+    if (!sessionCfbdKey) {
+      return `<div class="efficiency-panel"><div class="efficiency-missing">Add a CollegeFootballData.com key above to see PPA and SP+ efficiency ratings for these teams.</div></div>`;
+    }
+
+    const home = lookupEfficiency(homeTeam);
+    const away = lookupEfficiency(awayTeam);
+
+    if (!home && !away) {
+      return `<div class="efficiency-panel"><div class="efficiency-missing">No efficiency data found for this matchup yet — CFBD ratings can lag early in the season.</div></div>`;
+    }
+
+    const fmt = (n) => (n === null || n === undefined || isNaN(n)) ? '—' : n.toFixed(2);
+
+    const teamBlock = (name, stats) => `
+      <div class="efficiency-team">
+        <div class="name">${name}</div>
+        <div class="stat-line"><span>Off PPA</span><span>${stats ? fmt(stats.offPPA) : '—'}</span></div>
+        <div class="stat-line"><span>Def PPA</span><span>${stats ? fmt(stats.defPPA) : '—'}</span></div>
+        <div class="stat-line"><span>SP+ overall</span><span>${stats ? fmt(stats.spOverall) : '—'}</span></div>
+      </div>
+    `;
+
+    return `
+      <div class="efficiency-panel">
+        <div class="efficiency-title">Team Efficiency (season, via CFBD)</div>
+        <div class="efficiency-grid">
+          ${teamBlock(awayTeam, away)}
+          ${teamBlock(homeTeam, home)}
+        </div>
+        ${modelTotalNote(modelResult, marketTotal, confidence)}
+        ${!modelResult ? modelTotalSPNote(computeModelTotalSP(home, away), marketTotal, confidence) : ''}
+      </div>
+    `;
+  }
+
+  async function loadRankings() {
+    try {
+      const res = await fetch('https://site.api.espn.com/apis/site/v2/sports/football/college-football/rankings');
+      if (!res.ok) return;
+      const data = await res.json();
+      const poll = (data.rankings || []).find(r => /AP/i.test(r.name)) || (data.rankings || [])[0];
+      if (!poll) return;
+      const map = {};
+      (poll.ranks || []).forEach(r => {
+        if (r.team && r.team.displayName) map[r.team.displayName] = r.current;
+      });
+      rankMap = map;
+    } catch (e) {
+      // Rankings are a bonus layer — fail silently and just show unranked matchups
+      rankMap = {};
+    }
+  }
+
+  function rankBadge(teamName) {
+    const rank = rankMap[teamName];
+    return rank ? `<span class="rank-badge">#${rank}</span>` : '';
+  }
+
+  function loadLineHistory() {
+    let parsed = {};
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_LINEHISTORY);
+      parsed = raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      parsed = {};
+    }
+    // Prune events with no snapshot in the last two weeks. The odds feed only ever
+    // returns upcoming/live games, so a completed/expired event's id never comes back
+    // around to get overwritten - without this, history would grow forever across a season.
+    const cutoff = Date.now() - LINE_HISTORY_MAX_AGE_MS;
+    const pruned = {};
+    Object.keys(parsed).forEach(id => {
+      const hist = parsed[id];
+      if (Array.isArray(hist) && hist.length && hist[hist.length - 1].time >= cutoff) {
+        pruned[id] = hist;
+      }
+    });
+    lineHistory = pruned;
+  }
+
+  function saveLineHistory() {
+    try { localStorage.setItem(STORAGE_KEY_LINEHISTORY, JSON.stringify(lineHistory)); } catch (e) {}
+  }
+
+  function recordSnapshot(ev, spreadHome, total, mlHome, mlAway) {
+    if (!lineHistory[ev.id]) lineHistory[ev.id] = [];
+    const hist = lineHistory[ev.id];
+    const last = hist[hist.length - 1];
+    // Dedupe rapid-refresh spam (e.g. mashing the refresh button) without discarding a
+    // genuine re-check days later just because the line happens to be unchanged - the
+    // window-movement lookups below need "unchanged, confirmed at this timestamp" as a
+    // real data point, not just "changed."
+    if (last && (Date.now() - last.time) < LINE_HISTORY_MIN_GAP_MS) return;
+    hist.push({
+      time: Date.now(),
+      spreadHome: parseFloat(spreadHome),
+      total: parseFloat(total),
+      mlHome, mlAway
+    });
+    saveLineHistory();
+  }
+
+  function movementTag(eventId, field, currentVal) {
+    const hist = lineHistory[eventId];
+    if (!hist || hist.length < 2) return '';
+    const prev = hist[hist.length - 2][field];
+    const curr = parseFloat(currentVal);
+    if (isNaN(prev) || isNaN(curr) || prev === curr) return '';
+    const diff = (curr - prev).toFixed(1);
+    if (field === 'total') {
+      return curr > prev
+        ? `<span class="move up">▲ ${diff}</span>`
+        : `<span class="move down">▼ ${Math.abs(diff)}</span>`;
+    }
+    // For spreads, "movement toward home" vs "away" is more useful than raw sign
+    return curr > prev
+      ? `<span class="move up">▲ ${diff > 0 ? '+' + diff : diff}</span>`
+      : `<span class="move down">▼ ${diff}</span>`;
+  }
+
+  // Nearest snapshot recorded at or before (now - maxAgeMs). Returns null - not the
+  // closest snapshot available regardless of age - when nothing is that old yet, so
+  // callers can honestly show N/A instead of quietly comparing against a too-recent point.
+  function snapshotAtOrBefore(eventId, maxAgeMs) {
+    const hist = lineHistory[eventId];
+    if (!hist || hist.length === 0) return null;
+    const cutoff = Date.now() - maxAgeMs;
+    let best = null;
+    for (const snap of hist) {
+      if (snap.time <= cutoff && (!best || snap.time > best.time)) best = snap;
+    }
+    return best;
+  }
+
+  // Market Signal Engine, Phase 2: opening line + windowed movement, built from
+  // persisted `lineHistory`. Any window without an old-enough snapshot honestly
+  // reads N/A rather than being estimated - see the LINE_HISTORY comment above.
+  function marketActivityBlock(eventId, spreadHomeNum, total, homeAbbr) {
+    const hist = lineHistory[eventId];
+    if (!hist || hist.length === 0) return '';
+
+    const opening = hist[0];
+    const fmtSpread = (n) => (n == null || isNaN(n)) ? '—' : (n > 0 ? '+' : '') + n.toFixed(1);
+    const openVsCurrentSpread = (typeof spreadHomeNum === 'number' && !isNaN(opening.spreadHome))
+      ? `${homeAbbr} ${fmtSpread(opening.spreadHome)} &rarr; ${homeAbbr} ${fmtSpread(spreadHomeNum)}`
+      : 'N/A';
+    const currentTotalNum = parseFloat(total);
+    const openVsCurrentTotal = (!isNaN(currentTotalNum) && !isNaN(opening.total))
+      ? `${opening.total} &rarr; ${total}`
+      : 'N/A';
+
+    const windows = [
+      { label: '1H', ms: 60 * 60 * 1000 },
+      { label: '6H', ms: 6 * 60 * 60 * 1000 },
+      { label: '24H', ms: 24 * 60 * 60 * 1000 }
+    ];
+    const moveCell = (field, currentVal) => windows.map(w => {
+      const snap = snapshotAtOrBefore(eventId, w.ms);
+      if (!snap) return `<span class="market-window">${w.label}: <span class="na">N/A</span></span>`;
+      const prev = snap[field];
+      const curr = parseFloat(currentVal);
+      if (isNaN(prev) || isNaN(curr)) return `<span class="market-window">${w.label}: <span class="na">N/A</span></span>`;
+      const diff = curr - prev;
+      if (diff === 0) return `<span class="market-window">${w.label}: <span class="flat">flat</span></span>`;
+      const cls = diff > 0 ? 'up' : 'down';
+      const arrow = diff > 0 ? '▲' : '▼';
+      return `<span class="market-window">${w.label}: <span class="move ${cls}">${arrow} ${Math.abs(diff).toFixed(1)}</span></span>`;
+    }).join(' ');
+
+    const first = new Date(opening.time);
+    const spanNote = `${hist.length} snapshot${hist.length === 1 ? '' : 's'} since ${first.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`;
+
+    return `
+      <div class="market-activity">
+        <div class="market-activity-title">Market Activity</div>
+        <div class="market-row"><span class="lbl">Spread open&rarr;current</span><span>${openVsCurrentSpread}</span></div>
+        <div class="market-row market-windows">${moveCell('spreadHome', spreadHomeNum)}</div>
+        <div class="market-row"><span class="lbl">Total open&rarr;current</span><span>${openVsCurrentTotal}</span></div>
+        <div class="market-row market-windows">${moveCell('total', total)}</div>
+        <div class="market-row-note">${spanNote} — moneyline/steam/cross-book fields need multi-book history not yet collected, shown as N/A</div>
+      </div>
+    `;
+  }
+
+  function saveKeys() {
+    try {
+      localStorage.setItem(STORAGE_KEY_ODDS, sessionApiKey);
+      if (sessionCfbdKey) localStorage.setItem(STORAGE_KEY_CFBD, sessionCfbdKey);
+      else localStorage.removeItem(STORAGE_KEY_CFBD);
+    } catch (e) {}
+    forgetKeysBtn.style.display = 'inline';
+  }
+
+  function forgetKeys() {
+    try {
+      localStorage.removeItem(STORAGE_KEY_ODDS);
+      localStorage.removeItem(STORAGE_KEY_CFBD);
+    } catch (e) {}
+    sessionApiKey = '';
+    sessionCfbdKey = '';
+    apiKeyInput.value = '';
+    cfbdKeyInput.value = '';
+    forgetKeysBtn.style.display = 'none';
+    setStatus('Saved keys cleared from this device.', '');
+  }
+
+  function loadBetLog() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_BETLOG);
+      betLog = raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      betLog = [];
+    }
+  }
+
+  function saveBetLog() {
+    try { localStorage.setItem(STORAGE_KEY_BETLOG, JSON.stringify(betLog)); } catch (e) {}
+  }
+
+  function addBet(bettor, description) {
+    // Odds/stake are parsed once at log time (not re-parsed on every render) so a
+    // bet's $ figures stay stable even if the description text is edited later.
+    const parsed = parseBetDescription(description);
+    betLog.push({
+      id: Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+      bettor: bettor.trim(),
+      description: description.trim(),
+      result: 'pending',
+      loggedAt: new Date().toISOString(),
+      odds: parsed ? parsed.odds : null,
+      stake: parsed ? parsed.stake : null
+    });
+    saveBetLog();
+    renderBetTracker();
+  }
+
+  function updateBetResult(id, result) {
+    const bet = betLog.find(b => b.id === id);
+    if (bet) { bet.result = result; saveBetLog(); renderBetTracker(); }
+  }
+
+  function deleteBet(id) {
+    betLog = betLog.filter(b => b.id !== id);
+    saveBetLog();
+    renderBetTracker();
+  }
+
+  // Sunday-based year+week bucket, coarse but fine for a weekly-cadence sport.
+  function getWeekKey(isoDateStr) {
+    const d = new Date(isoDateStr);
+    const jan1 = new Date(d.getFullYear(), 0, 1);
+    const week = Math.ceil((((d - jan1) / 86400000) + jan1.getDay() + 1) / 7);
+    return `${d.getFullYear()}-W${week}`;
+  }
+
+  // Streak is computed from DECIDED bets only (pending entries are skipped, not
+  // counted as streak-breakers) so an unresolved bet doesn't hide a live streak.
+  function computeStreak(betsOldestFirst) {
+    const decided = betsOldestFirst.filter(b => b.result === 'win' || b.result === 'loss');
+    if (decided.length === 0) return null;
+    const type = decided[decided.length - 1].result;
+    let count = 0;
+    for (let i = decided.length - 1; i >= 0 && decided[i].result === type; i--) count++;
+    return { type, count };
+  }
+
+  // Segmented win/loss/push progress ring. The wrapping .bettor-ring-wrap rotates the
+  // whole SVG -90deg via CSS so the ring starts at 12 o'clock; stroke-dashoffset here
+  // is negative-cumulative so each segment picks up exactly where the last one ended.
+  function renderRingChart(wins, losses, pushes) {
+    const total = wins + losses + pushes;
+    const size = 84, r = 34, sw = 12;
+    const cx = size / 2, cy = size / 2;
+    const circ = 2 * Math.PI * r;
+
+    if (total === 0) {
+      return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(245,241,230,0.12)" stroke-width="${sw}" />
+      </svg>`;
+    }
+
+    const winLen = (wins / total) * circ;
+    const lossLen = (losses / total) * circ;
+    const pushLen = (pushes / total) * circ;
+    const seg = (len, offset, color) => len > 0
+      ? `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-dasharray="${len} ${circ - len}" stroke-dashoffset="${-offset}" />`
+      : '';
+
+    return `
+      <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(245,241,230,0.08)" stroke-width="${sw}" />
+        ${seg(winLen, 0, '#9FD8B0')}
+        ${seg(lossLen, winLen, '#F0A090')}
+        ${seg(pushLen, winLen + lossLen, 'rgba(245,241,230,0.35)')}
+      </svg>
+    `;
+  }
+
+  function renderTrendChart(betsOldestFirst) {
+    const weekBuckets = {};
+    betsOldestFirst.forEach(b => {
+      if (b.result !== 'win' && b.result !== 'loss') return;
+      const key = getWeekKey(b.loggedAt);
+      if (!weekBuckets[key]) weekBuckets[key] = { wins: 0, total: 0 };
+      weekBuckets[key].total++;
+      if (b.result === 'win') weekBuckets[key].wins++;
+    });
+    const weekKeys = Object.keys(weekBuckets).sort();
+    if (weekKeys.length === 0) return '';
+
+    const w = 300, h = 54, padX = 4, padY = 6;
+    const gradId = 'trendGrad' + Math.random().toString(36).slice(2, 8);
+
+    const points = weekKeys.map((key, i) => {
+      const { wins, total } = weekBuckets[key];
+      const pct = wins / total;
+      const x = weekKeys.length === 1 ? w / 2 : padX + (i / (weekKeys.length - 1)) * (w - padX * 2);
+      const y = padY + (1 - pct) * (h - padY * 2);
+      return { x, y, pct, wins, total, key };
+    });
+
+    const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+    const areaPath = `${linePath} L ${points[points.length - 1].x.toFixed(1)} ${h} L ${points[0].x.toFixed(1)} ${h} Z`;
+
+    const dots = points.map(p => {
+      const color = p.pct >= 0.5 ? '#9FD8B0' : '#F0A090';
+      return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.2" fill="${color}" stroke="#0F2A1F" stroke-width="1.5">` +
+             `<title>${p.key}: ${p.wins}-${p.total - p.wins} (${(p.pct * 100).toFixed(0)}%)</title></circle>`;
+    }).join('');
+
+    return `
+      <div class="trend-chart-label">Weekly win rate &middot; ${weekKeys.length} wk${weekKeys.length === 1 ? '' : 's'}</div>
+      <svg class="trend-chart" width="100%" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#D4A24C" stop-opacity="0.35" />
+            <stop offset="100%" stop-color="#D4A24C" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        <path d="${areaPath}" fill="url(#${gradId})" />
+        <path d="${linePath}" fill="none" stroke="#D4A24C" stroke-width="1.5" />
+        ${dots}
+      </svg>
+    `;
+  }
+
+  function renderBetTracker() {
+    const groups = {};
+    betLog.forEach(bet => {
+      if (!groups[bet.bettor]) groups[bet.bettor] = [];
+      groups[bet.bettor].push(bet);
+    });
+    const bettors = Object.keys(groups).sort();
+
+    if (bettors.length === 0) {
+      betRecordSummary.innerHTML = '';
+      betList.innerHTML = '<div class="bet-empty">No bets logged yet.</div>';
+      return;
+    }
+
+    // Each bettor's numbers are computed entirely from THEIR OWN bets - never pooled
+    // across bettors, per explicit instruction. The leaderboard below only DISPLAYS
+    // these independently-computed numbers side by side for comparison; it doesn't
+    // merge any underlying data.
+    const stats = bettors.map(name => {
+      const betsOldestFirst = groups[name]; // insertion order = chronological (loggedAt ascending)
+      const wins = betsOldestFirst.filter(b => b.result === 'win').length;
+      const losses = betsOldestFirst.filter(b => b.result === 'loss').length;
+      const pushes = betsOldestFirst.filter(b => b.result === 'push').length;
+      const decided = wins + losses;
+      const winPctNum = decided > 0 ? (wins / decided * 100) : null;
+
+      // Net profit only counts bets with BOTH odds and stake known (parsed from a
+      // trailing "$STAKE" in the description). Bettors with zero such bets get
+      // netProfit=null so "no $ data" never displays as "broke even at $0".
+      let netProfit = null;
+      betsOldestFirst.forEach(b => {
+        const p = computeProfit(b.odds, b.stake, b.result);
+        if (p !== null) netProfit = (netProfit ?? 0) + p;
+      });
+
+      return { name, betsOldestFirst, wins, losses, pushes, decided, winPctNum, netProfit };
+    });
+
+    // Rank order: highest win% first; bettors with no decided bets yet sort last.
+    // This same order drives both the leaderboard and the detail cards below it.
+    const ranked = [...stats].sort((a, b) => (b.winPctNum ?? -1) - (a.winPctNum ?? -1));
+
+    const leaderboardHtml = ranked.length < 2 ? '' : `
+      <div class="bet-leaderboard">
+        <div class="bet-leaderboard-title">Leaderboard</div>
+        ${ranked.map((s, i) => {
+          const pct = s.winPctNum;
+          const barPct = pct !== null ? pct : 0;
+          const barColor = pct === null ? 'rgba(245,241,230,0.15)' : (pct >= 50 ? '#9FD8B0' : '#F0A090');
+          return `
+            <div class="leaderboard-row">
+              <div class="leaderboard-rank ${i === 0 && pct !== null ? 'rank-1' : ''}">${i + 1}</div>
+              <div class="leaderboard-main">
+                <div class="leaderboard-top">
+                  <span class="leaderboard-name">${s.name}</span>
+                  <span class="leaderboard-pct">${pct !== null ? pct.toFixed(1) + '%' : '—'}</span>
+                </div>
+                <div class="leaderboard-bar-track">
+                  <div class="leaderboard-bar-fill" style="width:${barPct}%; background:${barColor};"></div>
+                </div>
+                <div class="leaderboard-record">${s.wins}-${s.losses}-${s.pushes}${formatProfit(s.netProfit) ? ` &middot; <span class="${s.netProfit >= 0 ? 'profit-pos' : 'profit-neg'}">${formatProfit(s.netProfit)}</span>` : ''}</div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+
+    const cardsHtml = ranked.map(s => {
+      const { name, betsOldestFirst, wins, losses, pushes, decided } = s;
+      const winPct = decided > 0 ? s.winPctNum.toFixed(0) : null;
+
+      const streak = computeStreak(betsOldestFirst);
+      const streakHtml = streak
+        ? `<div class="bettor-streak streak-${streak.type}">${streak.count}${streak.type === 'win' ? 'W' : 'L'} streak</div>`
+        : `<div class="bettor-streak streak-none">No streak yet</div>`;
+
+      return `
+        <div class="bettor-card">
+          <div class="bettor-card-header">
+            <div class="bettor-card-name">${name}</div>
+            ${streakHtml}
+          </div>
+          <div class="bettor-card-body">
+            <div class="bettor-ring-wrap">
+              ${renderRingChart(wins, losses, pushes)}
+              <div class="bettor-ring-center">
+                <div class="bettor-ring-pct">${winPct !== null ? winPct + '%' : '—'}</div>
+                <div class="bettor-ring-pct-label">Win Rate</div>
+              </div>
+            </div>
+            <div class="bettor-record-breakdown">
+              <div><span class="dot dot-win"></span><span class="n">${wins}</span> <span class="lbl">W</span></div>
+              <div><span class="dot dot-loss"></span><span class="n">${losses}</span> <span class="lbl">L</span></div>
+              <div><span class="dot dot-push"></span><span class="n">${pushes}</span> <span class="lbl">P</span></div>
+              ${formatProfit(s.netProfit) ? `<div class="net-profit ${s.netProfit >= 0 ? 'profit-pos' : 'profit-neg'}">${formatProfit(s.netProfit)} net</div>` : ''}
+            </div>
+          </div>
+          ${renderTrendChart(betsOldestFirst)}
+        </div>
+      `;
+    }).join('');
+
+    betRecordSummary.innerHTML = leaderboardHtml + cardsHtml;
+
+    betList.innerHTML = bettors.map(name => `
+      <div class="bet-group-title">${name} — log</div>
+      ${[...groups[name]].reverse().map(bet => `
+        <div class="bet-entry">
+          <div class="bet-entry-top">
+            <div>
+              <div class="bet-desc">${bet.description}</div>
+              <div class="bet-date">${new Date(bet.loggedAt).toLocaleDateString()}</div>
+            </div>
+            <button class="bet-entry-delete" onclick="deleteBet('${bet.id}')" aria-label="Delete">&times;</button>
+          </div>
+          <select class="result-${bet.result}" onchange="updateBetResult('${bet.id}', this.value)">
+            <option value="pending" ${bet.result === 'pending' ? 'selected' : ''}>Pending</option>
+            <option value="win" ${bet.result === 'win' ? 'selected' : ''}>Win</option>
+            <option value="loss" ${bet.result === 'loss' ? 'selected' : ''}>Loss</option>
+            <option value="push" ${bet.result === 'push' ? 'selected' : ''}>Push</option>
+          </select>
+        </div>
+      `).join('')}
+    `).join('');
+  }
+
+  // Parses either "TEAM SPREAD [ODDS] vs|@|at OPPONENT" or "OVER|UNDER TOTAL [ODDS]
+  // TEAM vs|@|at OPPONENT", with an optional trailing "$STAKE" (e.g. "...vs USC $50")
+  // used for profit tracking. Odds default to -110 (the standard vig) if omitted -
+  // verified against a real ticket: $50 at -110 pays $45.45, matching exactly.
+  // Anything that doesn't match either shape - prop bets, moneylines, non-CFB bets,
+  // informal wording - returns null and stays a manually-graded Pending bet.
+  function parseBetDescription(desc) {
+    let text = desc.trim();
+    let stake = null;
+    const stakeMatch = text.match(/\s*\$(\d+(?:\.\d+)?)\s*$/);
+    if (stakeMatch) {
+      stake = parseFloat(stakeMatch[1]);
+      text = text.slice(0, stakeMatch.index).trim();
+    }
+
+    const totalMatch = text.match(/^(over|under)\s+(\d+(?:\.\d+)?)\s*([+-]\d{2,4})?\s+(.+?)\s+(?:vs\.?|@|at)\s+(.+)$/i);
+    if (totalMatch) {
+      return {
+        type: 'total',
+        direction: totalMatch[1].toLowerCase(),
+        total: parseFloat(totalMatch[2]),
+        odds: totalMatch[3] ? parseInt(totalMatch[3], 10) : -110,
+        team: totalMatch[4].trim(),
+        opponent: totalMatch[5].trim(),
+        stake
+      };
+    }
+    const spreadMatch = text.match(/^(.+?)\s+([+-]\d+(?:\.\d+)?)\s*([+-]\d{2,4})?\s+(?:vs\.?|@|at)\s+(.+)$/i);
+    if (spreadMatch) {
+      return {
+        type: 'spread',
+        team: spreadMatch[1].trim(),
+        spread: parseFloat(spreadMatch[2]),
+        odds: spreadMatch[3] ? parseInt(spreadMatch[3], 10) : -110,
+        opponent: spreadMatch[4].trim(),
+        stake
+      };
+    }
+    return null;
+  }
+
+  // American-odds payout: negative odds (favorite) pay 100/|odds| per dollar risked;
+  // positive odds (underdog) pay odds/100 per dollar risked. Returns null (not $0)
+  // when there's nothing to compute, so "no stake data" never displays as "broke even".
+  function computeProfit(odds, stake, result) {
+    if (stake == null || odds == null) return null;
+    if (result === 'loss') return -stake;
+    if (result === 'win') return odds < 0 ? stake * (100 / Math.abs(odds)) : stake * (odds / 100);
+    if (result === 'push') return 0; // stake returned, no gain or loss
+    return null; // pending - nothing decided yet
+  }
+
+  // Returns '' (falsy) only for null/undefined, so a genuine $0.00 (e.g. all pushes)
+  // still displays rather than being treated as "no data".
+  function formatProfit(n) {
+    if (n === null || n === undefined) return '';
+    const sign = n >= 0 ? '+' : '-';
+    return `${sign}$${Math.abs(n).toFixed(2)}`;
+  }
+
+  async function checkResults() {
+    if (!sessionCfbdKey) {
+      checkResultsStatus.textContent = 'Add a CollegeFootballData.com key above to auto-check results.';
+      return;
+    }
+    const pending = betLog.filter(b => b.result === 'pending');
+    if (pending.length === 0) {
+      checkResultsStatus.textContent = 'No pending bets to check.';
+      return;
+    }
+
+    checkResultsBtn.disabled = true;
+    checkResultsStatus.textContent = 'Checking against CFBD results...';
+
+    try {
+      const headers = { 'Authorization': 'Bearer ' + sessionCfbdKey };
+      let games = [];
+      for (const year of [CFBD_YEAR, CFBD_YEAR - 1]) {
+        const res = await fetch(`https://api.collegefootballdata.com/games?year=${year}&seasonType=regular&classification=fbs`, { headers });
+        if (res.ok) games = games.concat(await res.json());
+      }
+
+      // Resolve names against the same full-team-universe matcher the rest of the
+      // dashboard uses; fall back to just this season's own team names if that
+      // hasn't loaded yet (e.g. Bet Tracker used before ever loading odds).
+      let nameUniverse = allTeamNames;
+      if (!nameUniverse.length) {
+        const set = new Set();
+        games.forEach(g => { set.add(g.homeTeam); set.add(g.awayTeam); });
+        nameUniverse = [...set];
+      }
+
+      let graded = 0, skipped = 0;
+      pending.forEach(bet => {
+        const parsed = parseBetDescription(bet.description);
+        if (!parsed) { skipped++; return; }
+
+        const teamCanonical = findBestPrefixMatch(nameUniverse, parsed.team) || parsed.team;
+        const oppCanonical = findBestPrefixMatch(nameUniverse, parsed.opponent) || parsed.opponent;
+
+        const game = games.find(g =>
+          g.completed && g.homePoints != null && g.awayPoints != null &&
+          ((g.homeTeam === teamCanonical && g.awayTeam === oppCanonical) ||
+           (g.awayTeam === teamCanonical && g.homeTeam === oppCanonical))
+        );
+        if (!game) { skipped++; return; } // no match, or game not final yet - stays Pending
+
+        if (parsed.type === 'total') {
+          const actualTotal = game.homePoints + game.awayPoints;
+          const t = parsed.total;
+          const hit = parsed.direction === 'over' ? actualTotal > t : actualTotal < t;
+          bet.result = actualTotal === t ? 'push' : (hit ? 'win' : 'loss');
+        } else {
+          const teamPoints = game.homeTeam === teamCanonical ? game.homePoints : game.awayPoints;
+          const oppPoints = game.homeTeam === teamCanonical ? game.awayPoints : game.homePoints;
+          const actualMargin = teamPoints - oppPoints;
+          const requiredToCover = -parsed.spread;
+          bet.result = actualMargin === requiredToCover ? 'push' : (actualMargin > requiredToCover ? 'win' : 'loss');
+        }
+        graded++;
+      });
+
+      saveBetLog();
+      renderBetTracker();
+      checkResultsStatus.textContent = graded > 0
+        ? `Graded ${graded} bet${graded === 1 ? '' : 's'} automatically. ${skipped} left pending (couldn't match to a final CFBD score).`
+        : `Couldn't auto-grade any of ${pending.length} pending bet${pending.length === 1 ? '' : 's'} - left pending for manual review.`;
+    } catch (e) {
+      checkResultsStatus.textContent = 'Could not reach CollegeFootballData - try again later.';
+    } finally {
+      checkResultsBtn.disabled = false;
+    }
+  }
+
+  // Everything in the bet tracker lives only in this browser's localStorage - export/
+  // import is the only backup, and the only way to move history to another device.
+  function exportBetLog() {
+    const blob = new Blob([JSON.stringify(betLog, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bet-tracker-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function importBetLogFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (!Array.isArray(parsed)) throw new Error('not an array');
+        const valid = parsed.every(b => b && typeof b.id === 'string' && typeof b.bettor === 'string' && typeof b.description === 'string');
+        if (!valid) throw new Error('unexpected shape');
+
+        const replace = confirm(`Import ${parsed.length} bet(s) from this file? This REPLACES your current log of ${betLog.length} bet(s) - click Cancel to merge instead (adds these without removing what you already have).`);
+        if (replace) {
+          betLog = parsed;
+        } else {
+          const existingIds = new Set(betLog.map(b => b.id));
+          parsed.forEach(b => { if (!existingIds.has(b.id)) betLog.push(b); });
+        }
+        saveBetLog();
+        renderBetTracker();
+        checkResultsStatus.textContent = `Imported ${parsed.length} bet(s) (${replace ? 'replaced' : 'merged'}).`;
+      } catch (e) {
+        checkResultsStatus.textContent = 'Could not import that file - not a valid bet tracker backup.';
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ===== Phase 3: Model Backtest Log =====
+  // Every game with a computable Model Disagreement gets frozen here the FIRST time
+  // it's seen (logRecommendation), then only ever touched again by grading (result/
+  // closingLine/clv — never the recommendation-time fields). This is what eventually
+  // lets Opportunity Score weights get fit empirically instead of assigned by hand —
+  // see NCAA_Power_Rating_Methodology.md, "Barnum & Payne architecture upgrade."
+
+  function loadRecommendationLog() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_RECLOG);
+      recommendationLog = raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      recommendationLog = [];
+    }
+  }
+
+  function saveRecommendationLog() {
+    try { localStorage.setItem(STORAGE_KEY_RECLOG, JSON.stringify(recommendationLog)); } catch (e) {}
+  }
+
+  // market: 'spread' | 'total'. availableLine/modelFairLine are both home-perspective
+  // for spread (negative = home favored, matching the market's own convention), and
+  // plain totals for total. disagreementGap uses the SAME sign convention already
+  // established by modelSpreadNote/computeModelTotal (gap = model - market; for spread,
+  // negative gap = model favors home more) so grading logic doesn't need to re-derive it.
+  function logRecommendation(entry) {
+    const id = entry.ev.id + '|' + entry.market;
+    if (recommendationLog.some(r => r.id === id)) return; // frozen — never re-logged
+    recommendationLog.push({
+      id,
+      market: entry.market,
+      loggedAt: new Date().toISOString(),
+      homeTeam: entry.ev.home_team,
+      awayTeam: entry.ev.away_team,
+      kickoff: entry.ev.commence_time,
+      week: entry.week === undefined ? null : entry.week,
+      sportsbook: entry.book ? entry.book.title : null,
+      availableLine: entry.availableLine,
+      modelFairLine: entry.modelFairLine,
+      disagreementGap: entry.disagreementGap,
+      modelConfidence: entry.confidence.score,
+      modelConfidenceReasons: entry.confidence.reasons,
+      flagged: Math.abs(entry.disagreementGap) >= MODEL_FLAG_THRESHOLD,
+      graded: false,
+      result: null,        // 'win' | 'loss' | 'push' — did the model's favored side hit, vs. availableLine
+      closingLine: null,
+      clv: null,           // positive = closing line moved toward the model's side after logging
+      finalHomePoints: null,
+      finalAwayPoints: null
+    });
+    saveRecommendationLog();
+  }
+
+  async function gradeRecommendations() {
+    if (!sessionCfbdKey) {
+      gradeRecsStatus.textContent = 'Add a CollegeFootballData.com key above to grade recommendations.';
+      return;
+    }
+    const pending = recommendationLog.filter(r => !r.graded);
+    if (pending.length === 0) {
+      gradeRecsStatus.textContent = 'No pending recommendations to grade.';
+      return;
+    }
+
+    gradeRecsBtn.disabled = true;
+    gradeRecsStatus.textContent = 'Grading against CFBD results and closing lines...';
+
+    try {
+      const headers = { 'Authorization': 'Bearer ' + sessionCfbdKey };
+      const years = [...new Set(pending.map(r => new Date(r.kickoff).getFullYear()))];
+      let games = [], lines = [];
+      for (const year of years) {
+        const [gRes, lRes] = await Promise.all([
+          fetch(`https://api.collegefootballdata.com/games?year=${year}&seasonType=regular&classification=fbs`, { headers }),
+          fetch(`https://api.collegefootballdata.com/lines?year=${year}&seasonType=regular`, { headers })
+        ]);
+        if (gRes.ok) games = games.concat(await gRes.json());
+        if (lRes.ok) lines = lines.concat(await lRes.json());
+      }
+      const linesById = {};
+      lines.forEach(l => { if (!linesById[l.id]) linesById[l.id] = l; });
+      const LINE_PROVIDER_PREFERENCE = ['DraftKings', 'ESPN Bet', 'Bovada'];
+      function selectClosingLine(entry, field) {
+        if (!entry || !entry.lines || !entry.lines.length) return null;
+        for (const p of LINE_PROVIDER_PREFERENCE) {
+          const m = entry.lines.find(l => l.provider === p && l[field] != null);
+          if (m) return m[field];
+        }
+        const any = entry.lines.find(l => l[field] != null);
+        return any ? any[field] : null;
+      }
+
+      let nameUniverse = allTeamNames;
+      if (!nameUniverse.length) {
+        const set = new Set();
+        games.forEach(g => { set.add(g.homeTeam); set.add(g.awayTeam); });
+        nameUniverse = [...set];
+      }
+
+      let graded = 0, skipped = 0;
+      pending.forEach(rec => {
+        const homeCanon = findBestPrefixMatch(nameUniverse, rec.homeTeam) || rec.homeTeam;
+        const awayCanon = findBestPrefixMatch(nameUniverse, rec.awayTeam) || rec.awayTeam;
+        const game = games.find(g =>
+          g.completed && g.homePoints != null && g.awayPoints != null &&
+          g.homeTeam === homeCanon && g.awayTeam === awayCanon
+        );
+        if (!game) { skipped++; return; } // not final yet, or couldn't match — stays pending
+
+        const lineEntry = linesById[game.id];
+        const actualMarginHome = game.homePoints - game.awayPoints;
+        const actualTotal = game.homePoints + game.awayPoints;
+
+        if (rec.market === 'total') {
+          const modelDir = rec.disagreementGap > 0 ? 'OVER' : 'UNDER';
+          rec.result = actualTotal === rec.availableLine ? 'push' : ((modelDir === 'OVER') === (actualTotal > rec.availableLine) ? 'win' : 'loss');
+          const closing = selectClosingLine(lineEntry, 'overUnder');
+          if (closing != null) {
+            rec.closingLine = closing;
+            const rawMove = closing - rec.availableLine;
+            rec.clv = modelDir === 'OVER' ? rawMove : -rawMove;
+          }
+        } else {
+          const modelSide = rec.disagreementGap < 0 ? 'home' : 'away'; // matches modelSpreadNote's `favors` convention
+          const requiredToCoverHome = -rec.availableLine;
+          const homeCovered = actualMarginHome > requiredToCoverHome;
+          const push = actualMarginHome === requiredToCoverHome;
+          rec.result = push ? 'push' : ((modelSide === 'home') === homeCovered ? 'win' : 'loss');
+          const closing = selectClosingLine(lineEntry, 'spread');
+          if (closing != null) {
+            rec.closingLine = closing;
+            const rawMove = closing - rec.availableLine; // positive = moved toward away side
+            rec.clv = modelSide === 'home' ? -rawMove : rawMove;
+          }
+        }
+        rec.finalHomePoints = game.homePoints;
+        rec.finalAwayPoints = game.awayPoints;
+        rec.graded = true;
+        graded++;
+      });
+
+      saveRecommendationLog();
+      renderBacktestStats();
+      gradeRecsStatus.textContent = graded > 0
+        ? `Graded ${graded} recommendation${graded === 1 ? '' : 's'}. ${skipped} left pending (game not final yet, or couldn't match).`
+        : `Couldn't grade any of ${pending.length} pending recommendation${pending.length === 1 ? '' : 's'} yet.`;
+    } catch (e) {
+      gradeRecsStatus.textContent = 'Could not reach CollegeFootballData — try again later.';
+    } finally {
+      gradeRecsBtn.disabled = false;
+    }
+  }
+
+  function wilsonIsh(hits, n) {
+    // Plain normal-approx CI, same formula used throughout the .ps1 backtest scripts —
+    // not exact for small n, but consistent with every other CI already in this project.
+    if (n === 0) return null;
+    const p = hits / n;
+    const se = Math.sqrt(p * (1 - p) / n);
+    const lo = Math.max(0, p - 1.96 * se) * 100;
+    const hi = Math.min(1, p + 1.96 * se) * 100;
+    return { p: p * 100, lo, hi };
+  }
+
+  function hitRateRow(label, rows) {
+    const decided = rows.filter(r => r.result === 'win' || r.result === 'loss');
+    const n = decided.length;
+    if (n === 0) return `<div class="backtest-row"><span>${label}</span><span class="val">n=0</span></div>`;
+    const hits = decided.filter(r => r.result === 'win').length;
+    const ci = wilsonIsh(hits, n);
+    const clvRows = rows.filter(r => typeof r.clv === 'number');
+    const avgClv = clvRows.length ? (clvRows.reduce((a, r) => a + r.clv, 0) / clvRows.length) : null;
+    const clvHtml = avgClv === null ? '' : ` · CLV <span class="val ${avgClv >= 0 ? 'clv-pos' : 'clv-neg'}">${avgClv >= 0 ? '+' : ''}${avgClv.toFixed(1)}</span>`;
+    return `<div class="backtest-row"><span>${label} (n=${n})</span><span class="val">${ci.p.toFixed(1)}% <span style="opacity:0.6">(${ci.lo.toFixed(0)}-${ci.hi.toFixed(0)}%)</span>${clvHtml}</span></div>`;
+  }
+
+  function renderBacktestStats() {
+    const total = recommendationLog.length;
+    const graded = recommendationLog.filter(r => r.graded).length;
+    const pending = total - graded;
+
+    if (total === 0) {
+      backtestStats.innerHTML = '<div class="bet-empty">No recommendations logged yet — they accumulate automatically as you load the board.</div>';
+      return;
+    }
+
+    const gradedRows = recommendationLog.filter(r => r.graded);
+    const spreadRows = gradedRows.filter(r => r.market === 'spread');
+    const totalRows = gradedRows.filter(r => r.market === 'total');
+
+    const confBucket = (rows, lo, hi) => rows.filter(r => r.modelConfidence >= lo && r.modelConfidence <= hi);
+    const weekEarly = (rows) => rows.filter(r => r.week != null && r.week <= 3);
+    const weekLate = (rows) => rows.filter(r => r.week != null && r.week > 3);
+    const favoriteSide = (r) => (r.availableLine < 0 ? 'home' : 'away');
+    const modelSide = (r) => (r.disagreementGap < 0 ? 'home' : 'away');
+    const spreadAgreesWithFavorite = spreadRows.filter(r => modelSide(r) === favoriteSide(r));
+    const spreadAgreesWithDog = spreadRows.filter(r => modelSide(r) !== favoriteSide(r));
+
+    backtestStats.innerHTML = `
+      <div class="backtest-row"><span>Logged / Graded / Pending</span><span class="val">${total} / ${graded} / ${pending}</span></div>
+
+      <div class="backtest-section">
+        <div class="backtest-section-title">Overall</div>
+        ${hitRateRow('Totals (all)', totalRows)}
+        ${hitRateRow('Spread (all)', spreadRows)}
+      </div>
+
+      <div class="backtest-section">
+        <div class="backtest-section-title">By flag threshold (≥ ${MODEL_FLAG_THRESHOLD} pts)</div>
+        ${hitRateRow('Totals, flagged', totalRows.filter(r => r.flagged))}
+        ${hitRateRow('Totals, not flagged', totalRows.filter(r => !r.flagged))}
+      </div>
+
+      <div class="backtest-section">
+        <div class="backtest-section-title">By model confidence</div>
+        ${hitRateRow('Totals, low (&lt;50)', confBucket(totalRows, 0, 49))}
+        ${hitRateRow('Totals, med (50-74)', confBucket(totalRows, 50, 74))}
+        ${hitRateRow('Totals, high (75+)', confBucket(totalRows, 75, 100))}
+        ${hitRateRow('Spread, low (&lt;50)', confBucket(spreadRows, 0, 49))}
+        ${hitRateRow('Spread, med (50-74)', confBucket(spreadRows, 50, 74))}
+        ${hitRateRow('Spread, high (75+)', confBucket(spreadRows, 75, 100))}
+      </div>
+
+      <div class="backtest-section">
+        <div class="backtest-section-title">By week</div>
+        ${hitRateRow('Totals, wk 0-3', weekEarly(totalRows))}
+        ${hitRateRow('Totals, wk 4+', weekLate(totalRows))}
+        ${hitRateRow('Spread, wk 0-3', weekEarly(spreadRows))}
+        ${hitRateRow('Spread, wk 4+', weekLate(spreadRows))}
+      </div>
+
+      <div class="backtest-section">
+        <div class="backtest-section-title">Spread: model backs favorite vs. dog</div>
+        ${hitRateRow('Backs favorite', spreadAgreesWithFavorite)}
+        ${hitRateRow('Backs underdog', spreadAgreesWithDog)}
+      </div>
+
+      <div class="backtest-row-note">
+        Not broken out yet: conference, sportsbook (only one book is captured per
+        game today), and moneyline (no moneyline model exists). Added when those
+        layers get built.
+      </div>
+    `;
+  }
+
+  function exportRecommendationLog() {
+    const blob = new Blob([JSON.stringify(recommendationLog, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backtest-log-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function importRecommendationLogFromFile(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        if (!Array.isArray(parsed)) throw new Error('not an array');
+        const valid = parsed.every(r => r && typeof r.id === 'string' && (r.market === 'spread' || r.market === 'total'));
+        if (!valid) throw new Error('unexpected shape');
+
+        const replace = confirm(`Import ${parsed.length} recommendation(s) from this file? This REPLACES your current log of ${recommendationLog.length} - click Cancel to merge instead.`);
+        if (replace) {
+          recommendationLog = parsed;
+        } else {
+          const existingIds = new Set(recommendationLog.map(r => r.id));
+          parsed.forEach(r => { if (!existingIds.has(r.id)) recommendationLog.push(r); });
+        }
+        saveRecommendationLog();
+        renderBacktestStats();
+        gradeRecsStatus.textContent = `Imported ${parsed.length} recommendation(s) (${replace ? 'replaced' : 'merged'}).`;
+      } catch (e) {
+        gradeRecsStatus.textContent = 'Could not import that file — not a valid backtest log backup.';
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function setStatus(msg, type) {
+    statusLine.textContent = msg;
+    statusLine.className = 'status-line' + (type ? ' ' + type : '');
+  }
+
+  function americanOdds(n) {
+    if (n === null || n === undefined) return '—';
+    return n > 0 ? '+' + n : String(n);
+  }
+
+  function formatKickoff(iso) {
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, {
+      weekday: 'short', month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit'
+    });
+  }
+
+  function pickBestBook(bookmakers) {
+    // Prefer a consensus-style book if present, else first available
+    const preferred = ['draftkings', 'fanduel', 'betmgm', 'caesars'];
+    for (const key of preferred) {
+      const found = bookmakers.find(b => b.key === key);
+      if (found) return found;
+    }
+    return bookmakers[0];
+  }
+
+  function renderGames(events) {
+    gamesEl.innerHTML = '';
+    lastEvents = events;
+
+    if (!events || events.length === 0) {
+      gamesEl.innerHTML = '<div class="empty-state">No games with posted lines right now. Check back closer to kickoff.</div>';
+      gameCount.textContent = '';
+      modelFlagCount.textContent = '';
+      lastPrepared = null;
+      return;
+    }
+
+    // ---- Pass 1: extract market data + the research-only model signal for every game,
+    // before touching the DOM, so it can be counted and (optionally) sorted by up front. ----
+    const prepared = events.map(ev => {
+      const book = ev.bookmakers && ev.bookmakers.length ? pickBestBook(ev.bookmakers) : null;
+      let spreadHome = '—', spreadAway = '—', total = '—', mlHome = '—', mlAway = '—';
+      let spreadHomeNum = null;
+
+      if (book) {
+        const spreadsMkt = book.markets.find(m => m.key === 'spreads');
+        const totalsMkt = book.markets.find(m => m.key === 'totals');
+        const h2hMkt = book.markets.find(m => m.key === 'h2h');
+
+        if (spreadsMkt) {
+          const home = spreadsMkt.outcomes.find(o => o.name === ev.home_team);
+          const away = spreadsMkt.outcomes.find(o => o.name === ev.away_team);
+          if (home) { spreadHome = (home.point > 0 ? '+' : '') + home.point; spreadHomeNum = home.point; }
+          if (away) spreadAway = (away.point > 0 ? '+' : '') + away.point;
+        }
+        if (totalsMkt && totalsMkt.outcomes[0]) {
+          total = totalsMkt.outcomes[0].point;
+        }
+        if (h2hMkt) {
+          const home = h2hMkt.outcomes.find(o => o.name === ev.home_team);
+          const away = h2hMkt.outcomes.find(o => o.name === ev.away_team);
+          if (home) mlHome = americanOdds(home.price);
+          if (away) mlAway = americanOdds(away.price);
+        }
+      }
+
+      const modelResult = computeModelTotal(lookupEfficiency(ev.home_team), lookupEfficiency(ev.away_team), total);
+      const flagged = !!modelResult && Math.abs(modelResult.gap) >= MODEL_FLAG_THRESHOLD;
+      // Research-only, never flagged/sorted — see computeModelSpread's comment.
+      const spreadResult = computeModelSpread(ev.home_team, ev.away_team, ev.commence_time);
+      // Data-reliability score, independent of disagreement size — see computeModelConfidence.
+      const confidence = computeModelConfidence(ev.home_team, ev.away_team);
+      const week = resolveGameWeek(ev.home_team, ev.away_team);
+
+      // Freeze a Phase 3 backtest-log entry the first time this game+market is seen.
+      // logRecommendation no-ops if already logged — see its comment.
+      if (modelResult) {
+        logRecommendation({
+          market: 'total', ev, book, week, confidence,
+          availableLine: total,
+          modelFairLine: modelResult.modelTotal,
+          disagreementGap: modelResult.gap
+        });
+      }
+      if (spreadResult && typeof spreadHomeNum === 'number') {
+        logRecommendation({
+          market: 'spread', ev, book, week, confidence,
+          availableLine: spreadHomeNum,
+          modelFairLine: spreadResult.modelSpread,
+          disagreementGap: spreadResult.modelSpread - spreadHomeNum
+        });
+      }
+
+      return { ev, book, spreadHome, spreadAway, spreadHomeNum, total, mlHome, mlAway, modelResult, flagged, spreadResult, confidence };
+    });
+
+    const flaggedCount = prepared.filter(p => p.flagged).length;
+    // "Model Disagreements" only — NOT the full Market Signal / Confirmed / Qualified
+    // Opportunity breakdown from the Barnum & Payne architecture notes. Those categories
+    // need persisted line-history snapshots (Market Signal Engine) and a backtested
+    // Opportunity Score, neither of which exists yet — showing fabricated counts for
+    // them would be exactly the kind of invented signal this project has spent all its
+    // effort avoiding. They get added here as each phase lands.
+    modelFlagCount.textContent = `${flaggedCount} Model Disagreement${flaggedCount === 1 ? '' : 's'} (≥ ${MODEL_FLAG_THRESHOLD} pts, research only)`;
+
+    // Record snapshots once per fetch, here — NOT inside renderPreparedList, so that re-sorting
+    // the already-fetched list doesn't masquerade as a new line-movement snapshot.
+    prepared.forEach(p => recordSnapshot(p.ev, p.spreadHome, p.total, p.mlHome, p.mlAway));
+    renderBacktestStats();
+
+    lastPrepared = prepared;
+    applySort();
+  }
+
+  function renderPreparedList(prepared) {
+    gameCount.textContent = prepared.length + ' GAME' + (prepared.length === 1 ? '' : 'S') + ' ANALYZED';
+    gamesEl.innerHTML = '';
+
+    prepared.forEach(({ ev, book, spreadHome, spreadAway, spreadHomeNum, total, mlHome, mlAway, modelResult, flagged, spreadResult, confidence }) => {
+      const spreadMove = movementTag(ev.id, 'spreadHome', spreadHome);
+      const totalMove = movementTag(ev.id, 'total', total);
+
+      const homeAbbr = ev.home_team.split(' ').slice(-1)[0];
+      const awayAbbr = ev.away_team.split(' ').slice(-1)[0];
+
+      const modelBadge = flagged
+        ? `<span class="model-badge" title="Model Disagreement — not a confirmed edge, confidence ${confidence.score}/100 — see methodology doc">DISAGREEMENT ${modelResult.dir} ${Math.abs(modelResult.gap).toFixed(1)}</span>`
+        : '';
+
+      const card = document.createElement('div');
+      card.className = 'game-card' + (flagged ? ' flagged' : '');
+      card.innerHTML = `
+        <div class="game-top">
+          <div class="matchup">${rankBadge(ev.away_team)}${ev.away_team}<span class="at">@</span>${rankBadge(ev.home_team)}${ev.home_team}${modelBadge}</div>
+          <div class="kickoff">${formatKickoff(ev.commence_time)}</div>
+        </div>
+        <div class="odds-row">
+          <div class="odds-cell">
+            <div class="lbl">Spread</div>
+            <div class="val">${homeAbbr} ${spreadHome}${spreadMove}
+              <small>${awayAbbr} ${spreadAway}</small>
+            </div>
+          </div>
+          <div class="odds-cell">
+            <div class="lbl">Total</div>
+            <div class="val">O/U ${total}${totalMove}</div>
+          </div>
+          <div class="odds-cell">
+            <div class="lbl">Moneyline</div>
+            <div class="val">${homeAbbr} ${mlHome}
+              <small>${awayAbbr} ${mlAway}</small>
+            </div>
+          </div>
+        </div>
+        ${efficiencyPanel(ev.home_team, ev.away_team, total, modelResult, confidence)}
+        ${modelSpreadNote(spreadResult, spreadHomeNum, homeAbbr, awayAbbr, confidence)}
+        ${marketActivityBlock(ev.id, spreadHomeNum, total, homeAbbr)}
+        <div class="movement-footer">
+          ${book ? `<div class="book-tag">Lines via ${book.title}</div>` : '<span></span>'}
+        </div>
+      `;
+      gamesEl.appendChild(card);
+    });
+
+    snapshotNote.style.display = 'block';
+  }
+
+  async function fetchOdds() {
+    if (!sessionApiKey) return;
+
+    loadBtn.disabled = true;
+    refreshBtn.disabled = true;
+    gamesEl.innerHTML = '<div class="loading-state"><div class="spinner"></div>Reading the board…</div>';
+    controls.style.display = 'flex';
+    gameCount.textContent = '';
+
+    const url = `https://api.the-odds-api.com/v4/sports/${SPORT_KEY}/odds/?apiKey=${encodeURIComponent(sessionApiKey)}&regions=us&markets=spreads,totals,h2h&oddsFormat=american&dateFormat=iso`;
+
+    try {
+      // Rankings and efficiency data are best-effort context; don't let either
+      // block odds from loading if they fail or the CFBD key is missing.
+      const contextFetches = [];
+      if (Object.keys(rankMap).length === 0) contextFetches.push(loadRankings());
+      if (sessionCfbdKey && Object.keys(efficiencyMap).length === 0) contextFetches.push(loadEfficiencyData());
+      if (sessionCfbdKey && baselineTotal === null) contextFetches.push(loadBaselineTotal());
+      if (sessionCfbdKey && Object.keys(eloMap).length === 0) contextFetches.push(loadEloAndRest());
+      if (sessionCfbdKey && allTeamNames.length === 0) contextFetches.push(loadAllTeamNames());
+      await Promise.all(contextFetches);
+
+      const res = await fetch(url);
+
+      if (!res.ok) {
+        const body = await res.text();
+        let message = 'Request failed (' + res.status + ').';
+        try {
+          const parsed = JSON.parse(body);
+          if (parsed.message) message = parsed.message;
+        } catch (e) {}
+        setStatus(message, 'err');
+        gamesEl.innerHTML = '';
+        controls.style.display = 'none';
+        loadBtn.disabled = false;
+        refreshBtn.disabled = false;
+        return;
+      }
+
+      const remaining = res.headers.get('x-requests-remaining');
+      const data = await res.json();
+
+      renderGames(data);
+      keyPanel.style.display = 'none';
+      setStatus(remaining ? `Connected · ${remaining} requests remaining this period` : 'Connected', 'ok');
+    } catch (err) {
+      setStatus('Could not reach the odds feed. Check your connection and try again.', 'err');
+      gamesEl.innerHTML = '';
+      controls.style.display = 'none';
+    } finally {
+      loadBtn.disabled = false;
+      refreshBtn.disabled = false;
+    }
+  }
+
+  loadBtn.addEventListener('click', () => {
+    const key = apiKeyInput.value.trim();
+    if (!key) {
+      setStatus('Paste a valid API key to load the slate.', 'err');
+      return;
+    }
+    sessionApiKey = key;
+    sessionCfbdKey = cfbdKeyInput.value.trim();
+    saveKeys();
+    fetchOdds();
+  });
+
+  apiKeyInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') loadBtn.click();
+  });
+
+  refreshBtn.addEventListener('click', fetchOdds);
+
+  function applySort() {
+    let ordered = lastPrepared;
+    if (sortByTotalDiff) {
+      ordered = [...lastPrepared].sort((a, b) => {
+        const gapA = a.modelResult ? Math.abs(a.modelResult.gap) : -1;
+        const gapB = b.modelResult ? Math.abs(b.modelResult.gap) : -1;
+        return gapB - gapA;
+      });
+    } else if (sortBySpreadDiff) {
+      ordered = [...lastPrepared].sort((a, b) => {
+        const gapA = (a.spreadResult && typeof a.spreadHomeNum === 'number') ? Math.abs(a.spreadResult.modelSpread - a.spreadHomeNum) : -1;
+        const gapB = (b.spreadResult && typeof b.spreadHomeNum === 'number') ? Math.abs(b.spreadResult.modelSpread - b.spreadHomeNum) : -1;
+        return gapB - gapA;
+      });
+    }
+    renderPreparedList(ordered);
+  }
+
+  sortTotalBtn.addEventListener('click', () => {
+    sortByTotalDiff = !sortByTotalDiff;
+    if (sortByTotalDiff) sortBySpreadDiff = false;
+    sortTotalBtn.classList.toggle('active', sortByTotalDiff);
+    sortTotalBtn.textContent = sortByTotalDiff ? '✓ Sorted by total difference' : 'Sort by total difference';
+    sortSpreadBtn.classList.remove('active');
+    sortSpreadBtn.textContent = 'Sort by spread difference';
+    if (lastPrepared) applySort();
+  });
+
+  sortSpreadBtn.addEventListener('click', () => {
+    sortBySpreadDiff = !sortBySpreadDiff;
+    if (sortBySpreadDiff) sortByTotalDiff = false;
+    sortSpreadBtn.classList.toggle('active', sortBySpreadDiff);
+    sortSpreadBtn.textContent = sortBySpreadDiff ? '✓ Sorted by spread difference' : 'Sort by spread difference';
+    sortTotalBtn.classList.remove('active');
+    sortTotalBtn.textContent = 'Sort by total difference';
+    if (lastPrepared) applySort();
+  });
+  forgetKeysBtn.addEventListener('click', forgetKeys);
+
+  // Single sidebar menu drives all four side panels — opening one closes any other
+  // that's open, so panels never stack visually the way the old dual-button layout could.
+  const allSidePanels = [betTrackerPanel, backtestPanel, fieldGuidePanel];
+  function openSidePanel(panel) {
+    allSidePanels.forEach(p => p.classList.toggle('open', p === panel));
+    sidebarDropdown.classList.remove('open');
+  }
+
+  sidebarMenuToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    sidebarDropdown.classList.toggle('open');
+  });
+  document.addEventListener('click', (e) => {
+    if (sidebarDropdown.classList.contains('open') && !sidebarDropdown.contains(e.target) && e.target !== sidebarMenuToggle) {
+      sidebarDropdown.classList.remove('open');
+    }
+  });
+  menuBetTracker.addEventListener('click', () => openSidePanel(betTrackerPanel));
+  menuBacktestLog.addEventListener('click', () => openSidePanel(backtestPanel));
+  menuExecSummary.addEventListener('click', () => {
+    openSidePanel(fieldGuidePanel);
+    document.getElementById('fg-summary').scrollIntoView();
+  });
+  menuGlossary.addEventListener('click', () => {
+    openSidePanel(fieldGuidePanel);
+    document.getElementById('fg-glossary').scrollIntoView();
+  });
+  fieldGuideClose.addEventListener('click', () => fieldGuidePanel.classList.remove('open'));
+
+  betTrackerClose.addEventListener('click', () => betTrackerPanel.classList.remove('open'));
+  betForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const bettor = betBettorInput.value.trim();
+    const lines = betDescInput.value.split('\n').map(l => l.trim()).filter(Boolean);
+    if (!bettor || lines.length === 0) return;
+    lines.forEach(line => addBet(bettor, line));
+    betDescInput.value = '';
+    betDescInput.focus();
+  });
+
+  checkResultsBtn.addEventListener('click', checkResults);
+  exportBetsBtn.addEventListener('click', exportBetLog);
+  importBetsBtn.addEventListener('click', () => importBetsFile.click());
+  importBetsFile.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) importBetLogFromFile(file);
+    importBetsFile.value = ''; // reset so re-selecting the same file still fires 'change'
+  });
+
+  backtestClose.addEventListener('click', () => backtestPanel.classList.remove('open'));
+  gradeRecsBtn.addEventListener('click', gradeRecommendations);
+  exportRecLogBtn.addEventListener('click', exportRecommendationLog);
+  importRecLogBtn.addEventListener('click', () => importRecLogFile.click());
+  importRecLogFile.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) importRecommendationLogFromFile(file);
+    importRecLogFile.value = '';
+  });
+
+  loadBetLog();
+  renderBetTracker();
+  loadLineHistory();
+  loadRecommendationLog();
+  renderBacktestStats();
+
+  (function initFromStorage() {
+    let storedOdds = null, storedCfbd = null;
+    try {
+      storedOdds = localStorage.getItem(STORAGE_KEY_ODDS);
+      storedCfbd = localStorage.getItem(STORAGE_KEY_CFBD);
+    } catch (e) {}
+
+    sessionApiKey = storedOdds || DEFAULT_ODDS_KEY;
+    sessionCfbdKey = storedCfbd || DEFAULT_CFBD_KEY;
+    apiKeyInput.value = sessionApiKey;
+    cfbdKeyInput.value = sessionCfbdKey;
+    if (storedOdds) forgetKeysBtn.style.display = 'inline';
+
+    if (sessionApiKey) fetchOdds();
+  })();
+</script>
+</body>
+</html>
