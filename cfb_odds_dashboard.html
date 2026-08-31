@@ -249,6 +249,38 @@
     gap: 6px;
   }
 
+  .matchup-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .pin-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-size: 17px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.3;
+    filter: grayscale(1);
+    transition: opacity 0.15s ease, filter 0.15s ease, transform 0.15s ease;
+    vertical-align: middle;
+  }
+  .pin-btn:hover { opacity: 0.7; transform: scale(1.1); }
+  .pin-btn.pinned {
+    opacity: 1;
+    filter: none;
+    text-shadow: 0 0 8px rgba(212,162,76,0.6);
+  }
+  .pin-btn.pinned:hover { transform: scale(1.1); }
+
+  .game-card.pinned {
+    border-left-color: var(--gold);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.22), 0 0 0 1px rgba(212,162,76,0.35), 0 0 16px rgba(212,162,76,0.12);
+  }
+
   .matchup {
     font-family: var(--font-display);
     font-weight: 400;
@@ -1380,6 +1412,11 @@
   const STORAGE_KEY_BETLOG = 'cfbSlate_betLog';
   const STORAGE_KEY_LINEHISTORY = 'cfbSlate_lineHistory';
   const STORAGE_KEY_RECLOG = 'cfbSlate_recommendationLog';
+  const STORAGE_KEY_PINNED = 'cfbSlate_pinnedGames';
+  // Event id -> true. Persisted so pins survive across sessions, same pattern as
+  // everything else here. Pinned games always sort first, regardless of the
+  // active sort mode (total diff / spread diff / default).
+  let pinnedGames = {};
   // Frozen model-recommendation log (Phase 3 backtesting) — one entry per (gameId,
   // market), written once on first sight and never rewritten except by grading (result/
   // closingLine/clv fields only). See logRecommendation and gradeRecommendations.
@@ -1891,6 +1928,26 @@
 
   function saveLineHistory() {
     try { localStorage.setItem(STORAGE_KEY_LINEHISTORY, JSON.stringify(lineHistory)); } catch (e) {}
+  }
+
+  function loadPinnedGames() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_PINNED);
+      pinnedGames = raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      pinnedGames = {};
+    }
+  }
+
+  function savePinnedGames() {
+    try { localStorage.setItem(STORAGE_KEY_PINNED, JSON.stringify(pinnedGames)); } catch (e) {}
+  }
+
+  function togglePin(eventId) {
+    if (pinnedGames[eventId]) delete pinnedGames[eventId];
+    else pinnedGames[eventId] = true;
+    savePinnedGames();
+    if (lastPrepared) applySort();
   }
 
   function recordSnapshot(ev, spreadHome, total, mlHome, mlAway) {
@@ -2866,16 +2923,21 @@
 
       const homeAbbr = ev.home_team.split(' ').slice(-1)[0];
       const awayAbbr = ev.away_team.split(' ').slice(-1)[0];
+      const isPinned = !!pinnedGames[ev.id];
+      const pinBtn = `<button type="button" class="pin-btn${isPinned ? ' pinned' : ''}" data-pin-id="${ev.id}" title="${isPinned ? 'Unpin' : 'Pin to top'}" aria-label="${isPinned ? 'Unpin' : 'Pin to top'}">&#127944;</button>`;
 
       const modelBadge = flagged
         ? `<span class="model-badge" title="Model Disagreement — not a confirmed edge, confidence ${confidence.score}/100 — see methodology doc">DISAGREEMENT ${modelResult.dir} ${Math.abs(modelResult.gap).toFixed(1)}</span>`
         : '';
 
       const card = document.createElement('div');
-      card.className = 'game-card' + (flagged ? ' flagged' : '');
+      card.className = 'game-card' + (flagged ? ' flagged' : '') + (isPinned ? ' pinned' : '');
       card.innerHTML = `
         <div class="game-top">
-          <div class="matchup">${rankBadge(ev.away_team)}${ev.away_team}<span class="at">@</span>${rankBadge(ev.home_team)}${ev.home_team}${modelBadge}</div>
+          <div class="matchup-row">
+            ${pinBtn}
+            <div class="matchup">${rankBadge(ev.away_team)}${ev.away_team}<span class="at">@</span>${rankBadge(ev.home_team)}${ev.home_team}${modelBadge}</div>
+          </div>
           <div class="kickoff">${formatKickoff(ev.commence_time)}</div>
         </div>
         <div class="odds-row">
@@ -2997,8 +3059,18 @@
         return gapB - gapA;
       });
     }
+    // Pinned games always float to the top, on top of whatever sort mode is active.
+    // Array.sort is stable, so this only reorders across the pinned/unpinned boundary —
+    // relative order within each group (as set above) is preserved.
+    ordered = [...ordered].sort((a, b) => (pinnedGames[b.ev.id] ? 1 : 0) - (pinnedGames[a.ev.id] ? 1 : 0));
     renderPreparedList(ordered);
   }
+
+  // Delegated (not per-card) since cards are rebuilt wholesale on every render.
+  gamesEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.pin-btn');
+    if (btn) togglePin(btn.dataset.pinId);
+  });
 
   sortTotalBtn.addEventListener('click', () => {
     sortByTotalDiff = !sortByTotalDiff;
@@ -3083,6 +3155,7 @@
   loadBetLog();
   renderBetTracker();
   loadLineHistory();
+  loadPinnedGames();
   loadRecommendationLog();
   renderBacktestStats();
 
