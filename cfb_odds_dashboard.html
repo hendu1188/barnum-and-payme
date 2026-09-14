@@ -1282,7 +1282,7 @@
 
   <div class="hash-divider">
     <div class="line"></div>
-    <div class="label">Week Odds</div>
+    <div class="label" id="weekLabel">Week Odds</div>
     <div class="tick"></div><div class="tick long"></div><div class="tick"></div>
   </div>
 
@@ -1394,6 +1394,7 @@
   const sortSpreadBtn = document.getElementById('sortSpreadBtn');
   const gamesEl = document.getElementById('games');
   const gameCount = document.getElementById('gameCount');
+  const weekLabel = document.getElementById('weekLabel');
   const modelFlagCount = document.getElementById('modelFlagCount');
   const snapshotNote = document.getElementById('snapshotNote');
 
@@ -1449,6 +1450,11 @@
   // extra API call is needed.
   let weekMap = {};
   let gamesPlayedMap = {};
+  // The current CFB week, derived from CFBD's own schedule (the week of the earliest
+  // not-yet-completed game) rather than a hand-maintained date table — CFBD already
+  // knows the real week boundaries and there's no reason to duplicate/guess them.
+  // null until a CFBD key is present and loadEloAndRest has resolved it.
+  let currentSeasonWeek = null;
   // Persisted line history (Market Signal Engine, Phase 2): { [eventId]: [{ time,
   // spreadHome, total, mlHome, mlAway }, ...] }. Sampled opportunistically whenever
   // the dashboard is opened/refreshed - there's no backend or scheduler to poll while
@@ -1571,13 +1577,29 @@
       lastPlayedMap = lastPlayed;
       weekMap = week;
       gamesPlayedMap = gamesPlayed;
+
+      // games is sorted ascending by date, so the first not-yet-completed game
+      // encountered has the minimum week number among uncompleted games — i.e. the
+      // week that's currently "on deck." Deliberately not "the week containing
+      // today's date," since a week's slate can start before or straddle any
+      // particular day depending on how the schedule falls.
+      currentSeasonWeek = null;
+      for (const g of games) {
+        if (!g.completed && g.week != null) { currentSeasonWeek = g.week; break; }
+      }
+      updateWeekLabel();
     } catch (e) {
       // Spread note is a bonus layer — odds still load fine without it
       eloMap = {};
       lastPlayedMap = {};
       weekMap = {};
       gamesPlayedMap = {};
+      currentSeasonWeek = null;
     }
+  }
+
+  function updateWeekLabel() {
+    weekLabel.textContent = currentSeasonWeek != null ? `Week ${currentSeasonWeek} Odds` : 'Week Odds';
   }
 
   // CFBD identifies teams by school name only (e.g. "Ohio State"), while the odds
@@ -2832,12 +2854,28 @@
     return bookmakers[0];
   }
 
-  function renderGames(events) {
+  function renderGames(rawEvents) {
     gamesEl.innerHTML = '';
+
+    // Restrict the board to the current CFB week (see currentSeasonWeek). The odds
+    // feed routinely carries next week's lines alongside the current week's before
+    // the current week is even finished, so without this the board mixes weeks.
+    // A game whose week can't be resolved (e.g. a name-matching gap) is kept rather
+    // than silently hidden — excluding it would misrepresent a data gap as "not this
+    // week" when it might just as easily be a real current-week game.
+    let events = rawEvents;
+    if (currentSeasonWeek != null && rawEvents && rawEvents.length) {
+      events = rawEvents.filter(ev => {
+        const wk = resolveGameWeek(ev.home_team, ev.away_team);
+        return wk === undefined || wk === currentSeasonWeek;
+      });
+    }
     lastEvents = events;
 
     if (!events || events.length === 0) {
-      gamesEl.innerHTML = '<div class="empty-state">No games with posted lines right now. Check back closer to kickoff.</div>';
+      gamesEl.innerHTML = rawEvents && rawEvents.length
+        ? `<div class="empty-state">Lines are posted for other weeks, but not yet for Week ${currentSeasonWeek}. Check back closer to kickoff.</div>`
+        : '<div class="empty-state">No games with posted lines right now. Check back closer to kickoff.</div>';
       gameCount.textContent = '';
       modelFlagCount.textContent = '';
       lastPrepared = null;
@@ -2875,8 +2913,14 @@
 
       const modelResult = computeModelTotal(lookupEfficiency(ev.home_team), lookupEfficiency(ev.away_team), total);
       const flagged = !!modelResult && Math.abs(modelResult.gap) >= MODEL_FLAG_THRESHOLD;
-      // Research-only, never flagged/sorted — see computeModelSpread's comment.
+      // Research-only — see computeModelSpread's comment. Not flagged/badged BY DEFAULT
+      // (totals stays the default highlight), but IS used for the card badge/border
+      // when the user has explicitly switched to "Sort by spread difference" — see
+      // renderPreparedList. That's a display-consistency fix, not a claim that spread
+      // has an edge; the "no proven edge" caveat still applies everywhere it's shown.
       const spreadResult = computeModelSpread(ev.home_team, ev.away_team, ev.commence_time);
+      const spreadFlagged = !!spreadResult && typeof spreadHomeNum === 'number'
+        && Math.abs(spreadResult.modelSpread - spreadHomeNum) >= MODEL_FLAG_THRESHOLD;
       // Data-reliability score, independent of disagreement size — see computeModelConfidence.
       const confidence = computeModelConfidence(ev.home_team, ev.away_team);
       const week = resolveGameWeek(ev.home_team, ev.away_team);
@@ -2900,17 +2944,8 @@
         });
       }
 
-      return { ev, book, spreadHome, spreadAway, spreadHomeNum, total, mlHome, mlAway, modelResult, flagged, spreadResult, confidence };
+      return { ev, book, spreadHome, spreadAway, spreadHomeNum, total, mlHome, mlAway, modelResult, flagged, spreadResult, spreadFlagged, confidence };
     });
-
-    const flaggedCount = prepared.filter(p => p.flagged).length;
-    // "Model Disagreements" only — NOT the full Market Signal / Confirmed / Qualified
-    // Opportunity breakdown from the Barnum & Payne architecture notes. Those categories
-    // need persisted line-history snapshots (Market Signal Engine) and a backtested
-    // Opportunity Score, neither of which exists yet — showing fabricated counts for
-    // them would be exactly the kind of invented signal this project has spent all its
-    // effort avoiding. They get added here as each phase lands.
-    modelFlagCount.textContent = `${flaggedCount} Model Disagreement${flaggedCount === 1 ? '' : 's'} (≥ ${MODEL_FLAG_THRESHOLD} pts, research only)`;
 
     // Record snapshots once per fetch, here — NOT inside renderPreparedList, so that re-sorting
     // the already-fetched list doesn't masquerade as a new line-movement snapshot.
@@ -2925,7 +2960,7 @@
     gameCount.textContent = prepared.length + ' GAME' + (prepared.length === 1 ? '' : 'S') + ' ANALYZED';
     gamesEl.innerHTML = '';
 
-    prepared.forEach(({ ev, book, spreadHome, spreadAway, spreadHomeNum, total, mlHome, mlAway, modelResult, flagged, spreadResult, confidence }) => {
+    prepared.forEach(({ ev, book, spreadHome, spreadAway, spreadHomeNum, total, mlHome, mlAway, modelResult, flagged, spreadResult, spreadFlagged, confidence }) => {
       const spreadMove = movementTag(ev.id, 'spreadHome', spreadHome);
       const totalMove = movementTag(ev.id, 'total', total);
 
@@ -2934,12 +2969,22 @@
       const isPinned = !!pinnedGames[ev.id];
       const pinBtn = `<button type="button" class="pin-btn${isPinned ? ' pinned' : ''}" data-pin-id="${ev.id}" title="${isPinned ? 'Unpin' : 'Pin to top'}" aria-label="${isPinned ? 'Unpin' : 'Pin to top'}">&#127944;</button>`;
 
-      const modelBadge = flagged
-        ? `<span class="model-badge" title="Model Disagreement — not a confirmed edge, confidence ${confidence.score}/100 — see methodology doc">DISAGREEMENT ${modelResult.dir} ${Math.abs(modelResult.gap).toFixed(1)}</span>`
-        : '';
+      // Badge/border track whichever metric is actively sorted by (see
+      // updateFlagSummary) so they never contradict the sort the user just picked.
+      // Totals stays the default highlight when no explicit sort is active.
+      const highlightSpread = sortBySpreadDiff;
+      const isHighlighted = highlightSpread ? spreadFlagged : flagged;
+      let modelBadge = '';
+      if (highlightSpread && spreadFlagged) {
+        const gap = spreadResult.modelSpread - spreadHomeNum;
+        const favors = gap < 0 ? homeAbbr : awayAbbr;
+        modelBadge = `<span class="model-badge" title="Model Disagreement — not a confirmed edge, confidence ${confidence.score}/100 — see methodology doc">DISAGREEMENT ${favors} ${Math.abs(gap).toFixed(1)}</span>`;
+      } else if (!highlightSpread && flagged) {
+        modelBadge = `<span class="model-badge" title="Model Disagreement — not a confirmed edge, confidence ${confidence.score}/100 — see methodology doc">DISAGREEMENT ${modelResult.dir} ${Math.abs(modelResult.gap).toFixed(1)}</span>`;
+      }
 
       const card = document.createElement('div');
-      card.className = 'game-card' + (flagged ? ' flagged' : '') + (isPinned ? ' pinned' : '');
+      card.className = 'game-card' + (isHighlighted ? ' flagged' : '') + (isPinned ? ' pinned' : '');
       card.innerHTML = `
         <div class="game-top">
           <div class="matchup-row">
@@ -3080,7 +3125,25 @@
   // is to get past the cache, unlike the auto-load / "Load the slate" path.
   refreshBtn.addEventListener('click', () => fetchOdds(true));
 
+  // "Model Disagreements" only — NOT the full Market Signal / Confirmed / Qualified
+  // Opportunity breakdown from the Barnum & Payne architecture notes. Those categories
+  // need persisted line-history snapshots (Market Signal Engine) and a backtested
+  // Opportunity Score, neither of which exists yet — showing fabricated counts for
+  // them would be exactly the kind of invented signal this project has spent all its
+  // effort avoiding. They get added here as each phase lands.
+  //
+  // Counts whichever metric is currently highlighted on the cards (see
+  // renderPreparedList) so the summary line never contradicts what's actually
+  // badged below it — re-run on every sort change, not just on fetch.
+  function updateFlagSummary(prepared) {
+    const bySpread = sortBySpreadDiff;
+    const flaggedCount = prepared.filter(p => bySpread ? p.spreadFlagged : p.flagged).length;
+    const metric = bySpread ? 'spread' : 'total';
+    modelFlagCount.textContent = `${flaggedCount} Model Disagreement${flaggedCount === 1 ? '' : 's'} (${metric}, ≥ ${MODEL_FLAG_THRESHOLD} pts, research only)`;
+  }
+
   function applySort() {
+    updateFlagSummary(lastPrepared);
     let ordered = lastPrepared;
     if (sortByTotalDiff) {
       ordered = [...lastPrepared].sort((a, b) => {
