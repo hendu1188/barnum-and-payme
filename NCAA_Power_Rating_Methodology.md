@@ -547,6 +547,41 @@ totals model itself is unchanged.)
 closes off two specific, previously-untested candidates raised by comparing
 against another model's proposed factor list (efficiency splits, finishing-
 drive rate) - a real result, not a reason to keep searching for a way to
-make either one work. Success rate and havoc rate remain untested as totals
-inputs specifically (only tested against spread, and found null there) -
-that gap is still open if revisited later.
+make either one work.
+
+## Totals model: success rate and havoc rate tested, also both null (2026-09-14)
+
+Closed the last open thread from the same comparison: success rate and
+havoc rate were already tested against the SPREAD model (as an Elo-residual
+adjustment) and found null there, but had never been tried against totals
+specifically. Script: `totals_success_havoc_test.ps1`, same harness and
+discipline as the points-per-opportunity/field-position test above.
+
+Reused the sign conventions already confirmed empirically in the original
+spread test rather than re-deriving them: `defense.successRate` positive =
+worse defense, `defense.havoc.total` positive = better defense (more
+disruptive plays forced). Combined predictors mirror the existing totals
+formula's cross-structure - `CombinedSuccessRate` sums both teams'
+offensive success plus what each defense allows (should push the total up);
+`CombinedHavoc` sums both teams' own defensive havoc rate (should push the
+total down, deliberately not double-counted from the offensive side too).
+
+**Result: both null.**
+
+| Candidate | Held-out 2025, before | after |
+|---|---|---|
+| Success rate | 53.2% (n=714) | 53.1% (n=714) |
+| Havoc rate | 53.2% (n=714) | 52.5% (n=714) |
+
+The fitted coefficients came out in the sane, expected direction (success
+rate +25.75, havoc rate -19.49 against the residual) - this is a genuine
+"doesn't help," not a sign error masquerading as one.
+
+**This closes out every candidate raised by the comparison against the
+other model's proposed factor list** - points-per-opportunity, field
+position, success rate, and havoc rate all tested against totals, all
+null. None of the four are being added. The totals model's status is
+unchanged: still `PACE_FACTOR`-only, still "unconfirmed, promising" per
+the original 53.6% held-out result, not weakened or strengthened by any of
+this - these were tests of whether something else could be ADDED to it,
+and the answer was no in every case tried so far.
