@@ -1443,11 +1443,13 @@
   const SPREAD_REST_ADJ = 1.0;
   let eloMap = {};
   let lastPlayedMap = {};
-  // For Model Confidence scoring only (see computeModelConfidence). Keyed by
-  // "homeSchool|awaySchool" -> CFBD week number; and school -> completed-games-so-far
-  // count. Both built from the same /games fetch loadEloAndRest already makes, so no
+  // For Model Confidence scoring (see computeModelConfidence) and the spread model's
+  // home-field adjustment (see computeModelSpread). Keyed by teamPairKey(home, away)
+  // -> CFBD week number / neutral-site flag; and school -> completed-games-so-far
+  // count. All built from the same /games fetch loadEloAndRest already makes, so no
   // extra API call is needed.
   let weekMap = {};
+  let neutralSiteMap = {};
   let gamesPlayedMap = {};
   // The current CFB week, derived from CFBD's own schedule (the week of the earliest
   // not-yet-completed game) rather than a hand-maintained date table — CFBD already
@@ -1560,6 +1562,7 @@
       const elo = {};
       const lastPlayed = {};
       const week = {};
+      const neutralSite = {};
       const gamesPlayed = {};
       games.forEach(g => {
         if (elo[g.homeTeam] === undefined && g.homePregameElo != null) elo[g.homeTeam] = g.homePregameElo;
@@ -1570,7 +1573,9 @@
         // those games. Confirmed against live data: Army/Navy, Virginia/West
         // Virginia, and Kansas/Arizona State all had the two providers disagreeing
         // on home vs. away, silently dropping the week lookup for exactly those games.
-        if (g.week != null) week[teamPairKey(g.homeTeam, g.awayTeam)] = g.week;
+        const pairKey = teamPairKey(g.homeTeam, g.awayTeam);
+        if (g.week != null) week[pairKey] = g.week;
+        if (g.neutralSite != null) neutralSite[pairKey] = g.neutralSite;
         if (g.completed && g.homePoints != null) {
           lastPlayed[g.homeTeam] = g.startDate;
           lastPlayed[g.awayTeam] = g.startDate;
@@ -1581,6 +1586,7 @@
       eloMap = elo;
       lastPlayedMap = lastPlayed;
       weekMap = week;
+      neutralSiteMap = neutralSite;
       gamesPlayedMap = gamesPlayed;
 
       // games is sorted ascending by date, so the first not-yet-completed game
@@ -1598,6 +1604,7 @@
       eloMap = {};
       lastPlayedMap = {};
       weekMap = {};
+      neutralSiteMap = {};
       gamesPlayedMap = {};
       currentSeasonWeek = null;
     }
@@ -1726,6 +1733,15 @@
     return (homeCanon && awayCanon) ? weekMap[teamPairKey(homeCanon, awayCanon)] : undefined;
   }
 
+  // true/false/undefined (unknown — CFBD data not loaded, or game not found).
+  // Used by computeModelSpread to skip the home-field adjustment for neutral-site
+  // games, where neither team actually has a home-field edge.
+  function resolveNeutralSite(homeTeamName, awayTeamName) {
+    const homeCanon = resolveCanonicalTeamName(homeTeamName);
+    const awayCanon = resolveCanonicalTeamName(awayTeamName);
+    return (homeCanon && awayCanon) ? neutralSiteMap[teamPairKey(homeCanon, awayCanon)] : undefined;
+  }
+
   function computeModelConfidence(homeTeamName, awayTeamName) {
     let score = 100;
     const reasons = [];
@@ -1781,8 +1797,16 @@
       else if (awayRestDays < SPREAD_REST_SHORT_DAYS && homeRestDays >= SPREAD_REST_BYE_DAYS) restAdj = SPREAD_REST_ADJ;
     }
 
+    // Neither team has a real home-field edge at a neutral site (bowl games, rivalry
+    // games at a shared/NFL venue like Army/Navy, etc.) — applying the usual boost
+    // there would be wrong regardless of which team the odds feed happens to label
+    // "home." Unknown (CFBD data not loaded, or game not found) defaults to applying
+    // it as before, same as any other missing-context case in this app.
+    const isNeutralSite = resolveNeutralSite(homeTeamName, awayTeamName) === true;
+    const homeFieldAdj = isNeutralSite ? 0 : SPREAD_HOME_FIELD_ADJ;
+
     const eloDiff = homeElo - awayElo;
-    const rawEdge = (eloDiff / SPREAD_ELO_PER_MARGIN) + SPREAD_HOME_FIELD_ADJ + restAdj;
+    const rawEdge = (eloDiff / SPREAD_ELO_PER_MARGIN) + homeFieldAdj + restAdj;
     const modelSpread = -1 * rawEdge; // market convention: negative = home favored
     return { modelSpread };
   }

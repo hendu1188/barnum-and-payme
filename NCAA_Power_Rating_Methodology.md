@@ -406,3 +406,42 @@ won't be invented by hand. The recommendation log now exists specifically
 so that, once a season's worth of graded observations accumulates, fitting
 Opportunity Score weights becomes a legitimate empirical exercise rather
 than embedding opinion into a sophisticated-looking score.
+
+## Bug fixes found via the real 2026 backtest log (2026-09-14)
+
+With weeks 1-2 actually graded, two real bugs surfaced - both traced back
+to the same root cause: **The Odds API and CFBD don't always agree on
+which team is "home" for a neutral-site game** (there's no real home team
+at a neutral site, so each provider evidently picks one on its own).
+Confirmed directly against CFBD's schedule data for three affected games -
+Army/Navy, Virginia/West Virginia, and Kansas/Arizona State - where the two
+providers had home and away reversed relative to each other.
+
+- **Week lookup silently failed for those games.** `weekMap` was keyed
+  strictly as `homeTeam|awayTeam`; a reversed pair produced a lookup miss
+  even though CFBD had the game's week right there under the other order.
+  This meant those specific games got no week-based Model Confidence
+  penalty and were excluded from the current-week filter, without any
+  visible sign of why. Fixed with an order-independent key
+  (`teamPairKey`, a sorted pair join) on both the write side
+  (`loadEloAndRest`) and read side (`resolveGameWeek`). Verified: both
+  orderings of all three games now resolve to the correct week.
+- **The spread model applied home-field advantage to neutral-site games.**
+  `computeModelSpread`'s +3.5 home-field term was applied to whichever
+  team the odds feed happened to label "home," even for a game like
+  Army/Navy where neither team has a real home-field edge. This wasn't a
+  data-matching bug - it's an accuracy gap in the model itself, and would
+  have existed even without the week-lookup bug above. Fixed by pulling
+  CFBD's own `neutralSite` flag into the same map-building pass
+  (`neutralSiteMap`, same `teamPairKey`) and zeroing the home-field term
+  when true. Verified against Army/Navy: with the fix, `computeModelSpread`
+  returns exactly 3.5 points less favorable to the labeled "home" team than
+  it did before - confirming only the home-field term moved, nothing else.
+  Rest-day adjustment is untouched by this fix, since rest disadvantage is
+  real regardless of venue.
+
+Neither of these was found by inspection - they surfaced because the
+recommendation log now has enough real, graded games to make "why didn't
+this game get a week/confidence value" an answerable question instead of
+a one-off anomaly to shrug at. That's exactly the point of building the
+backtest log before trying to trust anything it reports.
