@@ -613,7 +613,11 @@
     z-index: 60;
     transition: right 0.25s ease;
     overflow-y: auto;
-    padding: 20px 18px 40px;
+    /* Top padding clears the fixed .sidebar-menu button (top:20px, ~36px tall) —
+       without this, its close (x) button sits directly under the Menu button
+       (which has the higher z-index, since it must stay clickable to switch panels
+       while one is open) and swallows the click before it ever reaches the panel. */
+    padding: 68px 18px 40px;
   }
   .side-panel.open { right: 0; }
 
