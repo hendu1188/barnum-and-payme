@@ -445,3 +445,38 @@ recommendation log now has enough real, graded games to make "why didn't
 this game get a week/confidence value" an answerable question instead of
 a one-off anomaly to shrug at. That's exactly the point of building the
 backtest log before trying to trust anything it reports.
+
+## Model Confidence: games-played instead of calendar week (2026-09-14)
+
+`computeModelConfidence`'s small-sample penalty used to key off the
+calendar week (`week <= 3` -> a flat -20, no matter what). That treats a
+team on its 3rd game identically to one on its 1st, and produced almost
+no variation across an entire week's board - checked directly against the
+live week 3 slate, 110 of 114 games scored an identical 80/100, with the
+week-based penalty as the only thing distinguishing anyone from 100.
+
+Replaced with a check against `gamesPlayedMap` (already collected, wasn't
+being used) - the *weaker* team's actual completed-game count, since a
+game's reliability is bounded by whichever side has less season on record:
+
+- 0 completed games (either team): -35 (preseason-level)
+- 1 completed game: -25
+- 2 completed games: -15
+- 3+: no penalty
+
+The old "week could not be resolved" check stays, but shrunk to -15 (it
+used to double as a proxy for "preseason," which the games-played check
+now measures directly) - it's now purely a "couldn't confirm scheduling
+metadata" flag, independent of sample size.
+
+**Verified against the live week 3 board**, reading `reasons` directly
+rather than inferring from the score alone (two different reasons can
+produce the same number): a normal 2-game team lands at 85 with reason
+"played only 2 games"; Colorado - which had a game earlier in the season
+disrupted, leaving it on just 1 game - correctly drops to 75 with reason
+"played only 1 game"; a matchup where both sides already have 3+ games
+(North Dakota State @ Sacramento State) scores a clean 100 with no
+deductions at all. This is the real differentiation the flat week-based
+version couldn't produce - two teams can be in the same calendar week and
+have meaningfully different amounts of actual season on record (a bye
+week, a cancelled game, a conference that started earlier).

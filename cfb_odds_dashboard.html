@@ -1246,7 +1246,7 @@
 
     <div class="fg-group-title">Confidence &amp; Reliability</div>
     <dl>
-      <div class="fg-term"><dt>Model Confidence</dt><dd>A 0&ndash;100 score for how much to trust a game's inputs — never for how big its disagreement is. Docks points for preseason, weeks 0&ndash;3, and missing PPA/Elo data.</dd></div>
+      <div class="fg-term"><dt>Model Confidence</dt><dd>A 0&ndash;100 score for how much to trust a game's inputs — never for how big its disagreement is. Docks points based on each team's actual completed-game count (not the calendar week — a bye week or cancelled game shouldn't score like a normal one), plus missing PPA/Elo data.</dd></div>
       <div class="fg-term"><dt>Low Model Confidence banner</dt><dd>Appears below 50/100, naming the specific reasons the score was docked.</dd></div>
       <div class="fg-term"><dt>Data reliability <em>vs.</em> predictive power</dt><dd>Two deliberately separate questions: can the inputs be trusted (confidence) vs. has this number actually beaten the market historically (the backtest).</dd></div>
     </dl>
@@ -1719,6 +1719,12 @@
   // Deliberately rule-based and conservative (deduct from 100) rather than fit to
   // any outcome — this scores DATA RELIABILITY, not backtested predictive power.
   //
+  // Small-sample penalty is based on actual completed games played (gamesPlayedMap),
+  // not the calendar week — a "week <= 3" bucket treats every team the same
+  // regardless of a bye week, a cancelled game, or a conference that started earlier,
+  // and produces the same score for a team on its 3rd game as one on its 1st. Games
+  // actually played is the thing that's supposed to matter, so it's what gets scored.
+  //
   // Only scores what's actually computable today from data already loaded. Several
   // factors the full architecture calls for — starting-QB uncertainty, injury
   // reports, coaching-staff turnover, transfer-portal roster churn — have no wired
@@ -1751,16 +1757,31 @@
     const reasons = [];
 
     const week = resolveGameWeek(homeTeamName, awayTeamName);
-
     if (week === undefined) {
-      score -= 30;
+      // A smaller, standalone penalty now — this used to double as "no games played
+      // yet" (preseason), but that's measured directly below via gamesPlayedMap.
+      // What's left here is just "couldn't confirm scheduling metadata for this
+      // game," a real but modest data-quality flag on its own.
+      score -= 15;
       reasons.push('Game week could not be matched to CFBD schedule data');
-    } else if (week <= 0) {
+    }
+
+    // The weaker team's actual completed-game count, not the calendar week — see
+    // the comment above this function for why. matchTeamKey returns null for a team
+    // with zero completed games this season (it never entered the map), same as a
+    // team CFBD has no record of at all; both are correctly the least-confident case.
+    const homeGamesPlayed = matchTeamKey(gamesPlayedMap, homeTeamName) || 0;
+    const awayGamesPlayed = matchTeamKey(gamesPlayedMap, awayTeamName) || 0;
+    const minGamesPlayed = Math.min(homeGamesPlayed, awayGamesPlayed);
+    if (minGamesPlayed <= 0) {
       score -= 35;
-      reasons.push('Preseason — no current-season games played yet');
-    } else if (week <= 3) {
-      score -= 20;
-      reasons.push(`Week ${week} — small current-season sample`);
+      reasons.push('At least one team has 0 completed games this season — preseason-level sample');
+    } else if (minGamesPlayed === 1) {
+      score -= 25;
+      reasons.push('At least one team has played only 1 game this season — small sample');
+    } else if (minGamesPlayed === 2) {
+      score -= 15;
+      reasons.push('At least one team has played only 2 games this season — still an early sample');
     }
 
     const homeEff = lookupEfficiency(homeTeamName);
