@@ -448,20 +448,11 @@
     line-height: 1.5;
   }
 
-  .model-total-note {
-    margin-top: 10px;
-    padding: 8px 10px;
-    background: rgba(212,162,76,0.08);
-    border: 1px dashed rgba(212,162,76,0.35);
-    border-radius: 4px;
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    line-height: 1.6;
-    color: var(--chalk-dim);
-  }
-  .model-total-note strong { color: var(--gold); }
-
-  .model-spread-note {
+  /* Disagreement banner (total or spread note): muted by default, gold-highlighted
+     when it matches the metric currently being sorted by — see renderPreparedList.
+     Order in the card follows the same rule (whichever is highlighted goes on top),
+     so the base spacing (margin-top) has to work in either position. */
+  .disagreement-banner {
     margin-top: 8px;
     padding: 8px 10px;
     background: rgba(245,241,230,0.03);
@@ -473,7 +464,15 @@
     color: var(--chalk-dim);
     opacity: 0.75;
   }
-  .model-spread-note strong { color: var(--chalk-dim); opacity: 1; }
+  .disagreement-banner strong { color: var(--chalk-dim); opacity: 1; }
+  .disagreement-banner.highlighted {
+    padding: 8px 10px;
+    background: rgba(212,162,76,0.08);
+    border: 1px dashed rgba(212,162,76,0.35);
+    font-size: 10.5px;
+    opacity: 1;
+  }
+  .disagreement-banner.highlighted strong { color: var(--gold); }
 
   .tag-caveat { opacity: 0.7; }
   .tag-caveat a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
@@ -1776,7 +1775,7 @@
     return { modelSpread };
   }
 
-  function modelSpreadNote(result, marketSpreadHome, homeAbbr, awayAbbr, confidence) {
+  function modelSpreadNote(result, marketSpreadHome, homeAbbr, awayAbbr, confidence, highlighted) {
     if (!result || typeof marketSpreadHome !== 'number' || isNaN(marketSpreadHome)) return '';
     const fmtSpread = (n) => (n > 0 ? '+' : '') + n.toFixed(1);
     // gap = model - market. Negative gap => model favors home MORE than the market does
@@ -1785,7 +1784,7 @@
     const gap = result.modelSpread - marketSpreadHome;
     const favors = gap < 0 ? homeAbbr : awayAbbr;
     return `
-      <div class="model-spread-note">
+      <div class="disagreement-banner${highlighted ? ' highlighted' : ''}">
         <div class="disagreement-label">MODEL DISAGREEMENT: <strong>${favors} ${fmtSpread(Math.abs(gap))}</strong></div>
         <div>Model: ${homeAbbr} ${fmtSpread(result.modelSpread)} &nbsp;|&nbsp; Market: ${homeAbbr} ${fmtSpread(marketSpreadHome)}</div>
         ${confidenceLine(confidence)}
@@ -1830,12 +1829,12 @@
     return { modelTotal };
   }
 
-  function modelTotalSPNote(result, marketTotal, confidence) {
+  function modelTotalSPNote(result, marketTotal, confidence, highlighted) {
     if (!result || typeof marketTotal !== 'number' || isNaN(marketTotal)) return '';
     const gap = result.modelTotal - marketTotal;
     const dir = gap > 0 ? 'OVER' : 'UNDER';
     return `
-      <div class="model-spread-note">
+      <div class="disagreement-banner${highlighted ? ' highlighted' : ''}">
         <div class="disagreement-label">MODEL DISAGREEMENT (preseason): <strong>${dir} ${Math.abs(gap).toFixed(1)}</strong></div>
         <div>Model: ${result.modelTotal.toFixed(1)} &nbsp;|&nbsp; Market: ${marketTotal}</div>
         ${confidenceLine(confidence)}
@@ -1863,10 +1862,10 @@
     return { modelTotal, gap, dir: gap > 0 ? 'OVER' : 'UNDER' };
   }
 
-  function modelTotalNote(result, marketTotal, confidence) {
+  function modelTotalNote(result, marketTotal, confidence, highlighted) {
     if (!result) return '';
     return `
-      <div class="model-total-note">
+      <div class="disagreement-banner${highlighted ? ' highlighted' : ''}">
         <div class="disagreement-label">MODEL DISAGREEMENT: <strong>${result.dir} ${Math.abs(result.gap).toFixed(1)}</strong></div>
         <div>Model: ${result.modelTotal.toFixed(1)} &nbsp;|&nbsp; Market: ${marketTotal}</div>
         ${confidenceLine(confidence)}
@@ -1875,7 +1874,10 @@
     `;
   }
 
-  function efficiencyPanel(homeTeam, awayTeam, marketTotal, modelResult, confidence) {
+  // Team efficiency stats grid only — the total-disagreement banner is built
+  // separately (totalDisagreementNote) so it can be reordered/re-highlighted
+  // independent of this grid, alongside the spread banner. See renderPreparedList.
+  function efficiencyPanel(homeTeam, awayTeam) {
     if (!sessionCfbdKey) {
       return `<div class="efficiency-panel"><div class="efficiency-missing">Add a CollegeFootballData.com key above to see PPA and SP+ efficiency ratings for these teams.</div></div>`;
     }
@@ -1905,10 +1907,16 @@
           ${teamBlock(awayTeam, away)}
           ${teamBlock(homeTeam, home)}
         </div>
-        ${modelTotalNote(modelResult, marketTotal, confidence)}
-        ${!modelResult ? modelTotalSPNote(computeModelTotalSP(home, away), marketTotal, confidence) : ''}
       </div>
     `;
+  }
+
+  function totalDisagreementNote(homeTeam, awayTeam, marketTotal, modelResult, confidence, highlighted) {
+    if (modelResult) return modelTotalNote(modelResult, marketTotal, confidence, highlighted);
+    if (!sessionCfbdKey) return '';
+    const home = lookupEfficiency(homeTeam);
+    const away = lookupEfficiency(awayTeam);
+    return modelTotalSPNote(computeModelTotalSP(home, away), marketTotal, confidence, highlighted);
   }
 
   async function loadRankings() {
@@ -2983,6 +2991,13 @@
         modelBadge = `<span class="model-badge" title="Model Disagreement — not a confirmed edge, confidence ${confidence.score}/100 — see methodology doc">DISAGREEMENT ${modelResult.dir} ${Math.abs(modelResult.gap).toFixed(1)}</span>`;
       }
 
+      // Whichever banner matches the active sort mode is highlighted (gold) and
+      // shown first; the other stays muted and follows. Reuses highlightSpread from
+      // the badge logic above so the badge, border, and banner order never disagree.
+      const totalNoteHtml = totalDisagreementNote(ev.home_team, ev.away_team, total, modelResult, confidence, !highlightSpread);
+      const spreadNoteHtml = modelSpreadNote(spreadResult, spreadHomeNum, homeAbbr, awayAbbr, confidence, highlightSpread);
+      const disagreementNotes = highlightSpread ? (spreadNoteHtml + totalNoteHtml) : (totalNoteHtml + spreadNoteHtml);
+
       const card = document.createElement('div');
       card.className = 'game-card' + (isHighlighted ? ' flagged' : '') + (isPinned ? ' pinned' : '');
       card.innerHTML = `
@@ -3011,8 +3026,8 @@
             </div>
           </div>
         </div>
-        ${efficiencyPanel(ev.home_team, ev.away_team, total, modelResult, confidence)}
-        ${modelSpreadNote(spreadResult, spreadHomeNum, homeAbbr, awayAbbr, confidence)}
+        ${efficiencyPanel(ev.home_team, ev.away_team)}
+        ${disagreementNotes}
         ${marketActivityBlock(ev.id, spreadHomeNum, total, homeAbbr)}
         <div class="movement-footer">
           ${book ? `<div class="book-tag">Lines via ${book.title}</div>` : '<span></span>'}
