@@ -480,3 +480,31 @@ deductions at all. This is the real differentiation the flat week-based
 version couldn't produce - two teams can be in the same calendar week and
 have meaningfully different amounts of actual season on record (a bye
 week, a cancelled game, a conference that started earlier).
+
+## Recruiting talent composite added to Model Confidence (2026-09-14)
+
+Wired in CFBD's `/talent` endpoint (recruiting talent composite per team,
+FBS-scoped - confirmed 138 teams for 2026 before building anything against
+it) as a **Model Confidence input only** - it is deliberately NOT wired
+into the spread or total projections themselves. Adding it to the actual
+formulas would need the same backtesting discipline every other model
+input got (PACE_FACTOR, the Elo/margin conversion, home-field advantage),
+and there are only 143 graded games total right now - nowhere near enough
+to fit or validate a new projection input honestly.
+
+The idea: talent composite doesn't require any games to be played to
+exist, so when both teams have it, it's a genuine independent read on team
+quality available before the small-sample penalty even applies. It's used
+to **partially forgive** (not eliminate) that penalty - `TALENT_CONFIDENCE_OFFSET
+= 0.4`, i.e. 40% of the games-played deduction is forgiven when both teams
+have talent data. This constant is explicitly a judgment call, not a fit
+one - flagged as such in both the code comment and every `reasons` string
+it touches ("unvalidated adjustment"), the same honesty standard as the
+untested SP+ preseason total variant.
+
+**Verified**: Colorado @ Northwestern (Colorado on 1 game played, deduction
+25) moved from 75 to 85 once talent data was confirmed present for both
+teams - exactly the expected 25 x (1 - 0.4) = 15 reduced deduction.
+Confirmed the offset does NOT apply when talent data is missing for either
+side (tested directly against an FCS opponent, Delaware @ Merrimack - full
+deduction, no offset, no change to the reasons text).

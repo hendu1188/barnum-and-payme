@@ -1246,7 +1246,7 @@
 
     <div class="fg-group-title">Confidence &amp; Reliability</div>
     <dl>
-      <div class="fg-term"><dt>Model Confidence</dt><dd>A 0&ndash;100 score for how much to trust a game's inputs — never for how big its disagreement is. Docks points based on each team's actual completed-game count (not the calendar week — a bye week or cancelled game shouldn't score like a normal one), plus missing PPA/Elo data.</dd></div>
+      <div class="fg-term"><dt>Model Confidence</dt><dd>A 0&ndash;100 score for how much to trust a game's inputs — never for how big its disagreement is. Docks points based on each team's actual completed-game count (not the calendar week — a bye week or cancelled game shouldn't score like a normal one) and missing PPA/Elo data. The small-sample penalty is partially forgiven when recruiting talent data exists for both teams — an unvalidated but reasonable stand-in for evidence before games are played.</dd></div>
       <div class="fg-term"><dt>Low Model Confidence banner</dt><dd>Appears below 50/100, naming the specific reasons the score was docked.</dd></div>
       <div class="fg-term"><dt>Data reliability <em>vs.</em> predictive power</dt><dd>Two deliberately separate questions: can the inputs be trusted (confidence) vs. has this number actually beaten the market historically (the backtest).</dd></div>
     </dl>
@@ -1409,6 +1409,12 @@
   let sortBySpreadDiff = false;
   // Team name -> { offPPA, defPPA, spOverall, spOffense, spDefense }
   let efficiencyMap = {};
+  // Team name -> recruiting talent composite (CFBD /talent, FBS-scoped). Used only as
+  // a Model Confidence input (see computeModelConfidence) — NOT wired into the
+  // spread/total projections themselves, since doing that would need the same
+  // backtesting discipline every other model input got, and there isn't remotely
+  // enough graded data yet to do that honestly.
+  let talentMap = {};
   // Model total inputs — see NCAA_Power_Rating_Methodology.md. PACE_FACTOR was fit via
   // OLS on 2023-2024 CFBD data, validated out-of-sample on held-out 2025 (53.6% hit
   // rate, n=513, 95% CI 49.3-57.9% — a promising but NOT statistically confirmed edge).
@@ -1508,6 +1514,22 @@
     } catch (e) {
       // Efficiency data is a bonus layer — odds still load fine without it
       efficiencyMap = {};
+    }
+  }
+
+  async function loadTalentData() {
+    if (!sessionCfbdKey) return;
+    const headers = { 'Authorization': 'Bearer ' + sessionCfbdKey };
+    try {
+      const res = await fetch(`https://api.collegefootballdata.com/talent?year=${CFBD_YEAR}`, { headers });
+      if (!res.ok) return;
+      const data = await res.json();
+      const map = {};
+      data.forEach(t => { map[t.team] = t.talent; });
+      talentMap = map;
+    } catch (e) {
+      // Confidence-only bonus layer — odds still load fine without it
+      talentMap = {};
     }
   }
 
@@ -1752,6 +1774,15 @@
     return (homeCanon && awayCanon) ? neutralSiteMap[teamPairKey(homeCanon, awayCanon)] : undefined;
   }
 
+  // Fraction of the small-sample penalty forgiven when recruiting talent data is
+  // available for both teams (see computeModelConfidence). A judgment call, not a
+  // backtested constant — there isn't remotely enough graded data yet to fit this
+  // properly the way PACE_FACTOR or the Elo/margin conversion were. Talent doesn't
+  // replace games-played evidence, it's just a genuine independent read on team
+  // quality that's available before any games are played, so full-strength
+  // small-sample skepticism is too harsh when it's present for both sides.
+  const TALENT_CONFIDENCE_OFFSET = 0.4;
+
   function computeModelConfidence(homeTeamName, awayTeamName) {
     let score = 100;
     const reasons = [];
@@ -1773,15 +1804,28 @@
     const homeGamesPlayed = matchTeamKey(gamesPlayedMap, homeTeamName) || 0;
     const awayGamesPlayed = matchTeamKey(gamesPlayedMap, awayTeamName) || 0;
     const minGamesPlayed = Math.min(homeGamesPlayed, awayGamesPlayed);
+    let sampleSizeDeduction = 0;
+    let sampleSizeReason = null;
     if (minGamesPlayed <= 0) {
-      score -= 35;
-      reasons.push('At least one team has 0 completed games this season — preseason-level sample');
+      sampleSizeDeduction = 35;
+      sampleSizeReason = 'At least one team has 0 completed games this season — preseason-level sample';
     } else if (minGamesPlayed === 1) {
-      score -= 25;
-      reasons.push('At least one team has played only 1 game this season — small sample');
+      sampleSizeDeduction = 25;
+      sampleSizeReason = 'At least one team has played only 1 game this season — small sample';
     } else if (minGamesPlayed === 2) {
-      score -= 15;
-      reasons.push('At least one team has played only 2 games this season — still an early sample');
+      sampleSizeDeduction = 15;
+      sampleSizeReason = 'At least one team has played only 2 games this season — still an early sample';
+    }
+
+    if (sampleSizeDeduction > 0) {
+      const homeTalent = matchTeamKey(talentMap, homeTeamName);
+      const awayTalent = matchTeamKey(talentMap, awayTeamName);
+      if (homeTalent != null && awayTalent != null) {
+        sampleSizeDeduction -= Math.round(sampleSizeDeduction * TALENT_CONFIDENCE_OFFSET);
+        sampleSizeReason += ' (partially offset by recruiting talent data available for both teams — unvalidated adjustment)';
+      }
+      score -= sampleSizeDeduction;
+      reasons.push(sampleSizeReason);
     }
 
     const homeEff = lookupEfficiency(homeTeamName);
@@ -3132,6 +3176,7 @@
       const contextFetches = [];
       if (Object.keys(rankMap).length === 0) contextFetches.push(loadRankings());
       if (sessionCfbdKey && Object.keys(efficiencyMap).length === 0) contextFetches.push(loadEfficiencyData());
+      if (sessionCfbdKey && Object.keys(talentMap).length === 0) contextFetches.push(loadTalentData());
       if (sessionCfbdKey && baselineTotal === null) contextFetches.push(loadBaselineTotal());
       if (sessionCfbdKey && Object.keys(eloMap).length === 0) contextFetches.push(loadEloAndRest());
       if (sessionCfbdKey && allTeamNames.length === 0) contextFetches.push(loadAllTeamNames());
