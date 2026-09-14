@@ -1564,7 +1564,13 @@
       games.forEach(g => {
         if (elo[g.homeTeam] === undefined && g.homePregameElo != null) elo[g.homeTeam] = g.homePregameElo;
         if (elo[g.awayTeam] === undefined && g.awayPregameElo != null) elo[g.awayTeam] = g.awayPregameElo;
-        if (g.week != null) week[g.homeTeam + '|' + g.awayTeam] = g.week;
+        // Order-independent key (teamPairKey) — The Odds API and CFBD don't always
+        // agree on which team is "home" for a neutral-site game (there's no real
+        // home team to agree on), so a strict home|away key misses real matches for
+        // those games. Confirmed against live data: Army/Navy, Virginia/West
+        // Virginia, and Kansas/Arizona State all had the two providers disagreeing
+        // on home vs. away, silently dropping the week lookup for exactly those games.
+        if (g.week != null) week[teamPairKey(g.homeTeam, g.awayTeam)] = g.week;
         if (g.completed && g.homePoints != null) {
           lastPlayed[g.homeTeam] = g.startDate;
           lastPlayed[g.awayTeam] = g.startDate;
@@ -1708,10 +1714,16 @@
   // data source yet and are deliberately NOT scored (silently treating them as "fine"
   // would be worse than leaving them out; see reasons list, which stays honest about
   // what was and wasn't checked).
+  // Order-independent so a neutral-site home/away disagreement between providers
+  // can't cause a miss — see the comment where weekMap is populated.
+  function teamPairKey(a, b) {
+    return [a, b].sort().join('|');
+  }
+
   function resolveGameWeek(homeTeamName, awayTeamName) {
     const homeCanon = resolveCanonicalTeamName(homeTeamName);
     const awayCanon = resolveCanonicalTeamName(awayTeamName);
-    return (homeCanon && awayCanon) ? weekMap[homeCanon + '|' + awayCanon] : undefined;
+    return (homeCanon && awayCanon) ? weekMap[teamPairKey(homeCanon, awayCanon)] : undefined;
   }
 
   function computeModelConfidence(homeTeamName, awayTeamName) {
