@@ -1340,6 +1340,14 @@
   const SPORT_KEY = 'americanfootball_ncaaf';
   const CFBD_YEAR = new Date().getMonth() >= 6 ? new Date().getFullYear() : new Date().getFullYear() - 1;
   const STORAGE_KEY_ODDS = 'cfbSlate_oddsApiKey';
+  const STORAGE_KEY_ODDS_CACHE = 'cfbSlate_oddsCache';
+  // The Odds API bills by markets x regions per call (3 credits/fetch here), and the
+  // free tier is only 500/month — trivially burned through by repeated page loads
+  // during testing, or by several people opening the shared link close together.
+  // Auto-loads and the initial "Load the slate" reuse a cached response within this
+  // window instead of spending a fresh credit; "Refresh lines" always forces a real
+  // pull, since that's an explicit ask for the current board.
+  const ODDS_CACHE_COOLDOWN_MS = 15 * 60 * 1000;
   const STORAGE_KEY_CFBD = 'cfbSlate_cfbdApiKey';
   // Baked-in fallback keys so the slate loads without any input, even if this
   // browser's localStorage doesn't persist across sessions (private mode,
@@ -2971,7 +2979,23 @@
     snapshotNote.style.display = 'block';
   }
 
-  async function fetchOdds() {
+  function loadOddsCache() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_ODDS_CACHE);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveOddsCache(data) {
+    try { localStorage.setItem(STORAGE_KEY_ODDS_CACHE, JSON.stringify({ data, fetchedAt: Date.now() })); } catch (e) {}
+  }
+
+  // force=true (Refresh lines) always spends a real API credit. force=false (initial
+  // load, auto-load on open) reuses a cached response if it's within the cooldown
+  // window, so repeated opens/reloads don't quietly drain the monthly quota.
+  async function fetchOdds(force) {
     if (!sessionApiKey) return;
 
     loadBtn.disabled = true;
@@ -2980,11 +3004,10 @@
     controls.style.display = 'flex';
     gameCount.textContent = '';
 
-    const url = `https://api.the-odds-api.com/v4/sports/${SPORT_KEY}/odds/?apiKey=${encodeURIComponent(sessionApiKey)}&regions=us&markets=spreads,totals,h2h&oddsFormat=american&dateFormat=iso`;
-
     try {
       // Rankings and efficiency data are best-effort context; don't let either
-      // block odds from loading if they fail or the CFBD key is missing.
+      // block odds from loading if they fail or the CFBD key is missing. These hit
+      // CFBD, not The Odds API, so they aren't part of the quota being protected here.
       const contextFetches = [];
       if (Object.keys(rankMap).length === 0) contextFetches.push(loadRankings());
       if (sessionCfbdKey && Object.keys(efficiencyMap).length === 0) contextFetches.push(loadEfficiencyData());
@@ -2993,6 +3016,16 @@
       if (sessionCfbdKey && allTeamNames.length === 0) contextFetches.push(loadAllTeamNames());
       await Promise.all(contextFetches);
 
+      const cache = loadOddsCache();
+      if (!force && cache && (Date.now() - cache.fetchedAt) < ODDS_CACHE_COOLDOWN_MS) {
+        renderGames(cache.data);
+        keyPanel.style.display = 'none';
+        const ageMin = Math.max(1, Math.round((Date.now() - cache.fetchedAt) / 60000));
+        setStatus(`Showing cached lines from ${ageMin} min ago — click Refresh lines for the current board (saves your API quota).`, 'ok');
+        return;
+      }
+
+      const url = `https://api.the-odds-api.com/v4/sports/${SPORT_KEY}/odds/?apiKey=${encodeURIComponent(sessionApiKey)}&regions=us&markets=spreads,totals,h2h&oddsFormat=american&dateFormat=iso`;
       const res = await fetch(url);
 
       if (!res.ok) {
@@ -3012,6 +3045,7 @@
 
       const remaining = res.headers.get('x-requests-remaining');
       const data = await res.json();
+      saveOddsCache(data);
 
       renderGames(data);
       keyPanel.style.display = 'none';
@@ -3042,7 +3076,9 @@
     if (e.key === 'Enter') loadBtn.click();
   });
 
-  refreshBtn.addEventListener('click', fetchOdds);
+  // Explicit refresh always forces a real API pull — the whole point of clicking it
+  // is to get past the cache, unlike the auto-load / "Load the slate" path.
+  refreshBtn.addEventListener('click', () => fetchOdds(true));
 
   function applySort() {
     let ordered = lastPrepared;
