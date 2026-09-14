@@ -508,3 +508,45 @@ teams - exactly the expected 25 x (1 - 0.4) = 15 reduced deduction.
 Confirmed the offset does NOT apply when talent data is missing for either
 side (tested directly against an FCS opponent, Delaware @ Merrimack - full
 deduction, no offset, no change to the reasons text).
+
+## Totals model: points-per-opportunity and field position tested, both null (2026-09-14)
+
+Following up on the earlier comparison against another model's proposed
+methodology, tested whether two CFBD "advanced stats" fields - finishing-drive
+efficiency (`pointsPerOpportunity`) and field position (`averagePredictedPoints`
+from average starting field position) - explain anything the current totals
+model misses. Both fields live only on `/stats/season/advanced` (confirmed
+empirically - the per-game endpoint lacks them entirely), but that endpoint
+accepts `startWeek`/`endWeek` and returns genuine point-in-time cumulative
+stats (verified: 2024 Georgia at `endWeek=3` returned 174 offensive plays vs.
+936 for the full season) - so unlike SP+, this is safely backtestable without
+lookahead leakage.
+
+Script: `totals_advanced_stats_test.ps1`. Each candidate was fit as a
+univariate OLS regression against the CURRENT totals model's residual
+(actual total minus what `baselineTotal + PACE_FACTOR * PPA cross-terms`
+already projects) on train seasons (2023-2024) only, then applied out-of-
+sample to held-out 2025 - the same discipline as the spread non-linear-term
+test, testing one candidate at a time rather than jointly.
+
+**Result: both null, and both made held-out performance slightly worse, not
+better.**
+
+| Candidate | Held-out 2025, before | Held-out 2025, after |
+|---|---|---|
+| Points-per-opportunity | 53.1% (n=714) | 51.8% (n=714) |
+| Field position | 53.1% (n=714) | 52.1% (n=714) |
+
+(The 53.1%/n=714 baseline here differs slightly from the 53.6%/n=513 figure
+reported earlier in this document - expected, since this script's filtering
+requires week > 1 and both teams' prior-week advanced-stats snapshot to
+exist, a different game subset than the original backtest. The underlying
+totals model itself is unchanged.)
+
+**Conclusion**: neither field is being added to the totals model. This
+closes off two specific, previously-untested candidates raised by comparing
+against another model's proposed factor list (efficiency splits, finishing-
+drive rate) - a real result, not a reason to keep searching for a way to
+make either one work. Success rate and havoc rate remain untested as totals
+inputs specifically (only tested against spread, and found null there) -
+that gap is still open if revisited later.
