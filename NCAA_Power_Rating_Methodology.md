@@ -585,3 +585,34 @@ unchanged: still `PACE_FACTOR`-only, still "unconfirmed, promising" per
 the original 53.6% held-out result, not weakened or strengthened by any of
 this - these were tests of whether something else could be ADDED to it,
 and the answer was no in every case tried so far.
+
+## "Model pick" line and team records on the cards (2026-10-03)
+
+Each disagreement banner now ends its numbers with an explicit **Model pick**
+line - the side of the CURRENT market line the model's number leans toward
+(e.g. `OVER 51.5`, `Charlotte 49ers +18.5`) - and each card shows both teams'
+overall record after their names (CFBD `/records`, covers FBS and FCS,
+display only - not a model input).
+
+The pick line is a restatement of the disagreement already on the card, not
+a new signal. It deliberately reuses the backtest log's own side logic
+(spread gap < 0 -> home, totals gap > 0 -> OVER), so what's printed is
+exactly what gets logged and graded. It is labeled "Model pick," not a
+recommendation, and the caveat already in the same banner stays attached
+(spread: no proven edge; totals: unconfirmed; SP+ preseason: untested),
+along with the low-confidence warning. Gaps under the 3-pt flag threshold
+are tagged "slight lean" (34 of 102 pick lines on the week 5 board) so a
+0.1-pt gap isn't printed bare like a real pick. Full team names are used for
+spread picks, not mascots - two "Tigers" can be on the same board.
+
+For the record, what the live graded results said when this was added
+(weeks 1-2, n=143): spread 38.0% (n=92), totals 62.7% (n=51), with neither
+established as a betting signal. Adding the line makes the model's side
+easier to read; it does not change how much that side has earned trust.
+
+**Verified** against all 54 cards on the live week 5 board: every pick line
+matches the line posted in that card's own Spread/Total cell exactly, and
+both records show on every card. The check also caught two formatting
+mismatches in the first version (whole-number lines printing as "+3.0"
+beside a posted "+3", and a 2.96 gap displaying as "3.0" while tagged
+"under 3 pts"), both fixed before shipping.

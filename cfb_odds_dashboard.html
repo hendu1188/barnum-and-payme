@@ -485,6 +485,27 @@
   }
   .disagreement-label strong { color: var(--gold); }
 
+  /* Which side of the market line the model leans toward — see pickLine. */
+  .model-pick {
+    margin: 4px 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--chalk);
+    letter-spacing: 0.3px;
+  }
+  .disagreement-banner.highlighted .model-pick { color: var(--gold); }
+  .model-pick .pick-weak { font-weight: 400; opacity: 0.7; font-size: 10px; }
+
+  .team-record {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--chalk-dim);
+    margin-left: 5px;
+    vertical-align: middle;
+  }
+
   .low-confidence-banner {
     margin-top: 6px;
     padding: 5px 8px;
@@ -1161,8 +1182,9 @@
     <p class="fg-p">
       Barnum &amp; Payne runs an independent power-rating model alongside the
       live sportsbook line for every game, purely as a <strong>second
-      opinion</strong> — it is not a pick generator, and nothing is labeled a
-      proven edge until backtesting says so.
+      opinion</strong> — each game shows which side the model's numbers lean
+      toward (its "pick"), but that's not a validated recommendation, and
+      nothing is labeled a proven edge until backtesting says so.
     </p>
     <p class="fg-p">
       The <strong>spread model</strong> (Elo-based) has been tested five
@@ -1234,7 +1256,8 @@
     <div class="fg-group-title">Core Model</div>
     <dl>
       <div class="fg-term"><dt>Model Disagreement</dt><dd>The gap between the model's projection and the current sportsbook line. Never called an "edge" or "signal" — those are reserved for something backtesting has actually confirmed.</dd></div>
-      <div class="fg-term"><dt>Model Spread <span class="fg-status fg-status-noedge">No proven edge</span></dt><dd>Elo differential converted to margin, plus home-field and rest adjustments. Reference only — never used to flag or sort.</dd></div>
+      <div class="fg-term"><dt>Model pick</dt><dd>The side of the market line the model's number leans toward — e.g. <code>OVER 51.5</code> or <code>Panthers -10.5</code>. It's the model's side, not a validated bet: spread has no proven edge, totals is unconfirmed, and a gap under 3 pts is marked as a slight lean rather than a real pick.</dd></div>
+      <div class="fg-term"><dt>Model Spread <span class="fg-status fg-status-noedge">No proven edge</span></dt><dd>Elo differential converted to margin, plus home-field (skipped at neutral sites) and rest adjustments. Only highlights cards when you sort by spread difference.</dd></div>
       <div class="fg-term"><dt>Model Total <span class="fg-status fg-status-unconf">Unconfirmed</span></dt><dd>League-average baseline adjusted by each team's offensive/defensive PPA, scaled by a fitted pace factor.</dd></div>
       <div class="fg-term"><dt>Elo Rating</dt><dd>CFBD's pregame power rating. Used for the spread model because it's correct-as-of-kickoff by construction, unlike SP+.</dd></div>
       <div class="fg-term"><dt>PPA</dt><dd><strong>Predicted Points Added</strong> — CFBD's per-play efficiency metric. Positive offensive PPA is good; positive defensive PPA means the defense allows more than average.</dd></div>
@@ -1415,6 +1438,10 @@
   // backtesting discipline every other model input got, and there isn't remotely
   // enough graded data yet to do that honestly.
   let talentMap = {};
+  // Team name -> { wins, losses, ties } from CFBD /records (covers FBS and FCS;
+  // confirmed against the 2026 response before building on it). Display only —
+  // shown next to each team's name on the card, not used by any model.
+  let recordMap = {};
   // Model total inputs — see NCAA_Power_Rating_Methodology.md. PACE_FACTOR was fit via
   // OLS on 2023-2024 CFBD data, validated out-of-sample on held-out 2025 (53.6% hit
   // rate, n=513, 95% CI 49.3-57.9% — a promising but NOT statistically confirmed edge).
@@ -1531,6 +1558,33 @@
       // Confidence-only bonus layer — odds still load fine without it
       talentMap = {};
     }
+  }
+
+  async function loadRecords() {
+    if (!sessionCfbdKey) return;
+    const headers = { 'Authorization': 'Bearer ' + sessionCfbdKey };
+    try {
+      const res = await fetch(`https://api.collegefootballdata.com/records?year=${CFBD_YEAR}`, { headers });
+      if (!res.ok) return;
+      const data = await res.json();
+      const map = {};
+      data.forEach(t => {
+        if (t.total) map[t.team] = { wins: t.total.wins, losses: t.total.losses, ties: t.total.ties };
+      });
+      recordMap = map;
+    } catch (e) {
+      // Display-only bonus layer — the card just shows no record without it
+      recordMap = {};
+    }
+  }
+
+  // "(3-1)" / "(2-1-1)" after a team's name, or '' when CFBD has no record for it —
+  // a missing record is left blank rather than guessed.
+  function recordTag(teamName) {
+    const rec = matchTeamKey(recordMap, teamName);
+    if (!rec) return '';
+    const text = rec.ties ? `${rec.wins}-${rec.losses}-${rec.ties}` : `${rec.wins}-${rec.losses}`;
+    return `<span class="team-record">(${text})</span>`;
   }
 
   async function loadBaselineTotal() {
@@ -1880,7 +1934,7 @@
     return { modelSpread };
   }
 
-  function modelSpreadNote(result, marketSpreadHome, homeAbbr, awayAbbr, confidence, highlighted) {
+  function modelSpreadNote(result, marketSpreadHome, homeAbbr, awayAbbr, confidence, highlighted, homeName, awayName) {
     if (!result || typeof marketSpreadHome !== 'number' || isNaN(marketSpreadHome)) return '';
     const fmtSpread = (n) => (n > 0 ? '+' : '') + n.toFixed(1);
     // gap = model - market. Negative gap => model favors home MORE than the market does
@@ -1888,14 +1942,41 @@
     // favors the away side more than the market does.
     const gap = result.modelSpread - marketSpreadHome;
     const favors = gap < 0 ? homeAbbr : awayAbbr;
+    // The pick is the favored side at the CURRENT market number: home at the home
+    // spread, or away at its mirror (-homeSpread). Full team names, not mascots —
+    // two "Tigers" can be on the same board.
+    // Printed the way the book posts it (+3, -6.5), not toFixed(1), so the pick reads
+    // identically to the Spread cell on the same card instead of "+3.0" vs "+3".
+    const fmtLine = (n) => (n > 0 ? '+' : '') + n;
+    const pickText = gap < 0
+      ? `${homeName} ${fmtLine(marketSpreadHome)}`
+      : `${awayName} ${fmtLine(-marketSpreadHome)}`;
     return `
       <div class="disagreement-banner${highlighted ? ' highlighted' : ''}">
         <div class="disagreement-label">MODEL DISAGREEMENT: <strong>${favors} ${fmtSpread(Math.abs(gap))}</strong></div>
         <div>Model: ${homeAbbr} ${fmtSpread(result.modelSpread)} &nbsp;|&nbsp; Market: ${homeAbbr} ${fmtSpread(marketSpreadHome)}</div>
+        ${pickLine(pickText, Math.abs(gap))}
         ${confidenceLine(confidence)}
         <span class="tag-caveat">(no proven edge — <a href="NCAA_Power_Rating_Methodology.md" target="_blank" rel="noopener">methodology doc</a>)</span>
       </div>
     `;
+  }
+
+  // The side of the market line the model's number leans toward — its "pick" in the
+  // literal sense, NOT a validated recommendation: spread has no proven edge and
+  // totals is unconfirmed (the caveat tag in the same banner says so). Direction
+  // comes from the same gap sign the backtest log uses (gap < 0 => home on spread,
+  // gap > 0 => OVER on totals), so what's shown here is exactly what gets logged and
+  // graded. Gaps under the flag threshold are marked as slight leans — a 0.1-pt gap
+  // isn't really a pick, and printing it bare would read like one.
+  function pickLine(pickText, gapAbs) {
+    // Compared at the precision the banner prints (1 decimal), so a 2.96 gap that
+    // displays as "3.0" isn't tagged "under 3 pts" right next to its own label.
+    const displayedGap = Math.round(gapAbs * 10) / 10;
+    const weak = displayedGap < MODEL_FLAG_THRESHOLD
+      ? ` <span class="pick-weak">(slight lean — gap under ${MODEL_FLAG_THRESHOLD} pts)</span>`
+      : '';
+    return `<div class="model-pick">Model pick: ${pickText}${weak}</div>`;
   }
 
   // Model Confidence line + low-confidence warning, shared by the spread and total
@@ -1942,6 +2023,7 @@
       <div class="disagreement-banner${highlighted ? ' highlighted' : ''}">
         <div class="disagreement-label">MODEL DISAGREEMENT (preseason): <strong>${dir} ${Math.abs(gap).toFixed(1)}</strong></div>
         <div>Model: ${result.modelTotal.toFixed(1)} &nbsp;|&nbsp; Market: ${marketTotal}</div>
+        ${pickLine(`${dir} ${marketTotal}`, Math.abs(gap))}
         ${confidenceLine(confidence)}
         <span class="tag-caveat">(untested — <a href="NCAA_Power_Rating_Methodology.md" target="_blank" rel="noopener">methodology doc</a>)</span>
       </div>
@@ -1973,6 +2055,7 @@
       <div class="disagreement-banner${highlighted ? ' highlighted' : ''}">
         <div class="disagreement-label">MODEL DISAGREEMENT: <strong>${result.dir} ${Math.abs(result.gap).toFixed(1)}</strong></div>
         <div>Model: ${result.modelTotal.toFixed(1)} &nbsp;|&nbsp; Market: ${marketTotal}</div>
+        ${pickLine(`${result.dir} ${marketTotal}`, Math.abs(result.gap))}
         ${confidenceLine(confidence)}
         <span class="tag-caveat">(unconfirmed — <a href="NCAA_Power_Rating_Methodology.md" target="_blank" rel="noopener">methodology doc</a>)</span>
       </div>
@@ -3100,7 +3183,7 @@
       // shown first; the other stays muted and follows. Reuses highlightSpread from
       // the badge logic above so the badge, border, and banner order never disagree.
       const totalNoteHtml = totalDisagreementNote(ev.home_team, ev.away_team, total, modelResult, confidence, !highlightSpread);
-      const spreadNoteHtml = modelSpreadNote(spreadResult, spreadHomeNum, homeAbbr, awayAbbr, confidence, highlightSpread);
+      const spreadNoteHtml = modelSpreadNote(spreadResult, spreadHomeNum, homeAbbr, awayAbbr, confidence, highlightSpread, ev.home_team, ev.away_team);
       const disagreementNotes = highlightSpread ? (spreadNoteHtml + totalNoteHtml) : (totalNoteHtml + spreadNoteHtml);
 
       const card = document.createElement('div');
@@ -3109,7 +3192,7 @@
         <div class="game-top">
           <div class="matchup-row">
             ${pinBtn}
-            <div class="matchup">${rankBadge(ev.away_team)}${ev.away_team}<span class="at">@</span>${rankBadge(ev.home_team)}${ev.home_team}${modelBadge}</div>
+            <div class="matchup">${rankBadge(ev.away_team)}${ev.away_team}${recordTag(ev.away_team)}<span class="at">@</span>${rankBadge(ev.home_team)}${ev.home_team}${recordTag(ev.home_team)}${modelBadge}</div>
           </div>
           <div class="kickoff">${formatKickoff(ev.commence_time)}</div>
         </div>
@@ -3177,6 +3260,7 @@
       if (Object.keys(rankMap).length === 0) contextFetches.push(loadRankings());
       if (sessionCfbdKey && Object.keys(efficiencyMap).length === 0) contextFetches.push(loadEfficiencyData());
       if (sessionCfbdKey && Object.keys(talentMap).length === 0) contextFetches.push(loadTalentData());
+      if (sessionCfbdKey && Object.keys(recordMap).length === 0) contextFetches.push(loadRecords());
       if (sessionCfbdKey && baselineTotal === null) contextFetches.push(loadBaselineTotal());
       if (sessionCfbdKey && Object.keys(eloMap).length === 0) contextFetches.push(loadEloAndRest());
       if (sessionCfbdKey && allTeamNames.length === 0) contextFetches.push(loadAllTeamNames());
