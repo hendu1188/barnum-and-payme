@@ -2764,7 +2764,17 @@
   // plain totals for total. disagreementGap uses the SAME sign convention already
   // established by modelSpreadNote/computeModelTotal (gap = model - market; for spread,
   // negative gap = model favors home more) so grading logic doesn't need to re-derive it.
+  //
+  // Only games that haven't kicked off yet are logged. An entry frozen after kickoff
+  // would carry whatever line the feed shows mid-game as its "available line," which
+  // isn't a pre-game recommendation and would quietly skew every hit rate computed
+  // from the log. A missing or unparseable commence_time also fails this check
+  // (NaN > now is false) — if kickoff can't be verified as in the future, the entry
+  // isn't logged, and grading couldn't use it anyway (it keys off the kickoff year).
   function logRecommendation(entry) {
+    const kickoffMs = new Date(entry.ev.commence_time).getTime();
+    if (!(kickoffMs > Date.now())) return;
+
     const id = entry.ev.id + '|' + entry.market;
     if (recommendationLog.some(r => r.id === id)) return; // frozen — never re-logged
     recommendationLog.push({

@@ -616,3 +616,25 @@ both records show on every card. The check also caught two formatting
 mismatches in the first version (whole-number lines printing as "+3.0"
 beside a posted "+3", and a 2.96 gap displaying as "3.0" while tagged
 "under 3 pts"), both fixed before shipping.
+
+## Backtest log: only pre-game entries are logged (2026-10-03)
+
+`logRecommendation` now skips any game whose kickoff isn't strictly in the
+future, including a missing or unparseable `commence_time`. Before this there
+was no check at all, so an entry could be frozen mid-game carrying a live line
+as its "available line" - not a pre-game recommendation, and enough to skew
+that entry's hit rate and CLV, and everything aggregated from it.
+
+Worth being precise about what this is: a guard against a plausible hole, not
+a fix for observed contamination. Whether the odds feed ever returned started
+games to the log is unknown - none were on the board when this was added, and
+the exported log that could have answered it was no longer on disk. Entries
+logged before this change are not retroactively checked; each one stores
+`loggedAt` and `kickoff`, so the next export can be audited directly for any
+entry logged at or after kickoff.
+
+**Verified**: on the live week 5 board the count is unchanged (102 pick lines
+displayed, 102 entries logged - legitimate pre-game entries aren't blocked).
+Synthetic games with a kickoff an hour ago, one second ago, missing, and
+unparseable were all rejected; a future-kickoff control was logged once and its
+duplicate was rejected by the existing freeze.
