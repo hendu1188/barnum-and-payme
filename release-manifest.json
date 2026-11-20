@@ -1,6 +1,6 @@
 {
   "version": "1.1.0",
-  "preparedAt": "2026-11-20T14:51:09.543Z",
+  "preparedAt": "2026-11-20T14:53:15.633Z",
   "files": [
     {
       "file": ".dockerignore",
@@ -94,8 +94,8 @@
     },
     {
       "file": "render.yaml",
-      "bytes": 1084,
-      "sha256": "a154d2c97b09584d017166a7306a66d61e6daaed3a27d9b8b301c4ff8f9fd256"
+      "bytes": 1087,
+      "sha256": "58fd201f82b54f132b135c573ba8c390a16f907817bebf19f6dde9342a356316"
     },
     {
       "file": "research/joint-reference.json",

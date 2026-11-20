@@ -5,7 +5,7 @@ services:
   - type: web
     name: parlay-all-day
     runtime: node
-    plan: starter
+    plan: 0.5c-512mb
     region: oregon
     numInstances: 1
     buildCommand: npm ci --ignore-scripts --omit=dev
