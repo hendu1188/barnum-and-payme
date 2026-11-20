@@ -1,0 +1,345 @@
+{
+  "version": "1.1.0",
+  "preparedAt": "2026-11-20T14:51:09.543Z",
+  "files": [
+    {
+      "file": ".dockerignore",
+      "bytes": 117,
+      "sha256": "1517cfcae8e1b149e8f9d61f9898e36320f8d5c09498daec9c05da0e502162c8"
+    },
+    {
+      "file": ".env.example",
+      "bytes": 406,
+      "sha256": "14a32cf7f2c87a9b5851c3b1a9abf10380a0f9a89ffe3b87abed6d8c55f7e4a6"
+    },
+    {
+      "file": ".gitattributes",
+      "bytes": 120,
+      "sha256": "9a9c14d9404a731aaf7cd1872131a753ff21f99f09a3a345930a8a71ecfa7529"
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "bytes": 558,
+      "sha256": "14e830d6d0fbced979c9c00d03364351b4024af02177ddd31ed1a5d7a8d838de"
+    },
+    {
+      "file": ".gitignore",
+      "bytes": 154,
+      "sha256": "d47e44532589a162655cbec85b1cd875cbfd457ff89fe22dffda28282bcf7b7d"
+    },
+    {
+      "file": "cfb_odds_dashboard.html",
+      "bytes": 198,
+      "sha256": "5f3d3daf85342e0cb49e4b9f96dd3a51c9aec879266f5e36c0470c1ca06bb8d9"
+    },
+    {
+      "file": "DEPLOY.md",
+      "bytes": 6858,
+      "sha256": "725b5e4c403e5ace33982583abab5eefef92897d592a7d584773c9ce53eba2d3"
+    },
+    {
+      "file": "Dockerfile",
+      "bytes": 401,
+      "sha256": "b818a2b933f31c76d513dd460d4a04e1aaaa37ae7b55d52f4376734724f08f59"
+    },
+    {
+      "file": "index.html",
+      "bytes": 628,
+      "sha256": "5d6c7e3e8094c8edb320f5b3733089abccb417b250280213e63156c39fe32752"
+    },
+    {
+      "file": "Open Parlay All Day.cmd",
+      "bytes": 141,
+      "sha256": "e954777126e2413e32faafb58e2088bc60e746ce876d3365ddea748fbd59d65b"
+    },
+    {
+      "file": "package-lock.json",
+      "bytes": 275,
+      "sha256": "fe1433c9395c3cb9dbb720d129caa34794f2e1924a7a8c8a0191c1fb5a6d2716"
+    },
+    {
+      "file": "package.json",
+      "bytes": 473,
+      "sha256": "3fc5b4b63482469c1d5bbd557e7c0d7dbb479cae2f10af52b791fa1fd10fe7b9"
+    },
+    {
+      "file": "public/app.css",
+      "bytes": 5600,
+      "sha256": "d3df88bb4e0a8fb40c1e72e2b1f3a5e5312b084a2d8e5e492f8d64fb7ebfd756"
+    },
+    {
+      "file": "public/app.js",
+      "bytes": 21858,
+      "sha256": "db90fc794d81c467e83fd160a153ae64a4e48bff3c38224f879b65c2e3d28e81"
+    },
+    {
+      "file": "public/index.html",
+      "bytes": 6144,
+      "sha256": "272205d1baf2916f37e8e7b1a482cce578c1919de78e704eb9573d7354ef808a"
+    },
+    {
+      "file": "public/logo.png",
+      "bytes": 1122920,
+      "sha256": "614570ad30391e81a7024e793591bbccdfe7075bfbea2844b25bffae01f31f60"
+    },
+    {
+      "file": "public/weekend.jpg",
+      "bytes": 309666,
+      "sha256": "d20e67a4c734813621ba50345e6748086803e2cf684069862832f34d2f7d7d55"
+    },
+    {
+      "file": "README.md",
+      "bytes": 1801,
+      "sha256": "ef21d894860d305f5903219ea438af9043deed26cc42a71ed9f1ed4b58eddf32"
+    },
+    {
+      "file": "render.yaml",
+      "bytes": 1084,
+      "sha256": "a154d2c97b09584d017166a7306a66d61e6daaed3a27d9b8b301c4ff8f9fd256"
+    },
+    {
+      "file": "research/joint-reference.json",
+      "bytes": 56979,
+      "sha256": "4532f1336d05a62099dfad527b445447c9088e9a8cc96db6d1ae8cbf13937471"
+    },
+    {
+      "file": "research/margin-diagnostics.json",
+      "bytes": 3757,
+      "sha256": "7fee676ca16f7d60bb424b8eda213bacc678e09a3246e266f72f82e50a0b7ffa"
+    },
+    {
+      "file": "research/prospective.cjs",
+      "bytes": 1230,
+      "sha256": "519b983ff202e89806413f197ac202feea25b8716ddd6c4a9d0313fd2b149d64"
+    },
+    {
+      "file": "research/totals-diagnostics.json",
+      "bytes": 3359,
+      "sha256": "135e382de1349457df054b9a2fd1ebc95c28f593c5a76e2cfaed4dcf946afa51"
+    },
+    {
+      "file": "research/walk-forward-results.json",
+      "bytes": 2307,
+      "sha256": "422755148dc4e9931b74e30b39c23ba5bdfe8577b8a94629e24a7778041832ba"
+    },
+    {
+      "file": "research/walk-forward.cjs",
+      "bytes": 3544,
+      "sha256": "9e2ae8c6132855247751d6524d0297e278b1313a4eb5b676579b189ed7b59c40"
+    },
+    {
+      "file": "scripts/verify-release.cjs",
+      "bytes": 1916,
+      "sha256": "52596795979d99b4f7deb89164940cffd2c0ad965b99b5ff424aed3b9a24c26a"
+    },
+    {
+      "file": "server/audit.cjs",
+      "bytes": 3740,
+      "sha256": "a79b667e3af175f39125d7f2b7c6ec2b382db2333a67b0c29968cccf66b7e64f"
+    },
+    {
+      "file": "server/bootstrap.cjs",
+      "bytes": 1367,
+      "sha256": "0a29a7ce4e96c5abfea106e9c259dc88dd873246eb82eb18f2ab4a94446e36dc"
+    },
+    {
+      "file": "server/collector.cjs",
+      "bytes": 10027,
+      "sha256": "5ba9b3f000183d08243fe950dcbae174f8f3da982d91b31f6bb8841af88b18c1"
+    },
+    {
+      "file": "server/context.cjs",
+      "bytes": 3002,
+      "sha256": "5ed7e43bc293b71b5b3309bbb06cd85015bfaafcb1136245ff30daa4340fd5a5"
+    },
+    {
+      "file": "server/dossiers.cjs",
+      "bytes": 9398,
+      "sha256": "1b88a4b62907a46ca4bfdad98a0ea6f55ec367ca1c616270f70f5fa606dcd1ae"
+    },
+    {
+      "file": "server/features.cjs",
+      "bytes": 2258,
+      "sha256": "b2746640689c369ccd2333d6e29052ea7b1fe61e1dc297ed8cc3ad816bf000d1"
+    },
+    {
+      "file": "server/hash-password.cjs",
+      "bytes": 941,
+      "sha256": "782b92310aabc38472778223c51f31e6d5c5b9caf30b179fb07eaf3d06807550"
+    },
+    {
+      "file": "server/identity.cjs",
+      "bytes": 4273,
+      "sha256": "eccb04f367cbf8fdd6874d4e3205a220eaf7627a127c030e6ce978a2956776c1"
+    },
+    {
+      "file": "server/ledger.cjs",
+      "bytes": 11317,
+      "sha256": "1c167edcb05d7c2c311c4817ef11283aee8b240142e7a9dadefd7f1a86051ebc"
+    },
+    {
+      "file": "server/main.cjs",
+      "bytes": 12985,
+      "sha256": "702ec8b7f1f3c1b5567d2c4c7794177e88ea4b9d066738a2a2276af0a65b02f1"
+    },
+    {
+      "file": "server/models/ai-research.js",
+      "bytes": 4117,
+      "sha256": "460d9cf3e54f993415fb3611a4fad90d2f01f168232947313eeff904cc93fe8d"
+    },
+    {
+      "file": "server/models/drive-totals-config.json",
+      "bytes": 939,
+      "sha256": "32ccfac2e0ae9c771af9452f09fb6bc0b139c1fda33dff01a77aa530649d3528"
+    },
+    {
+      "file": "server/models/drive-totals.js",
+      "bytes": 6790,
+      "sha256": "30bba820a1188a535239570eaac5ff9cf53d90b2d192d3024269777d145e6cdd"
+    },
+    {
+      "file": "server/models/personnel-scenarios.js",
+      "bytes": 3691,
+      "sha256": "32503086a5c7c12b5cf7ef7305dccf25787126a576dc4cacf3d9d8a73dacfd88"
+    },
+    {
+      "file": "server/models/shortlist-engine-v2.js",
+      "bytes": 14246,
+      "sha256": "815535c848bd7427cdcc565eb6021ebb00fbeba0c542c025ead3c7b7ad3f5471"
+    },
+    {
+      "file": "server/models/totals-repair-config.json",
+      "bytes": 13303,
+      "sha256": "68c2ea93c7e6d4786064ceb341acebecce9a65f8f962fee20d2d1afcbde03756"
+    },
+    {
+      "file": "server/models/totals-residual-model.js",
+      "bytes": 2527,
+      "sha256": "f14302408cfdbed6c93818683b051f84ad758ed8cee768caa0c5223b8d226280"
+    },
+    {
+      "file": "server/models/unified-model-config.json",
+      "bytes": 30035,
+      "sha256": "09863f998a3fe3e318abc3ebcf9298d9ded97d5dd515fc9a69c941cb5ba44d75"
+    },
+    {
+      "file": "server/models/unified-model.js",
+      "bytes": 6650,
+      "sha256": "52b7b115006adb4bca1559ceb7edb01ab5d59056935a6b36ff8c6dfa31f2d6b6"
+    },
+    {
+      "file": "server/models/value-selection.js",
+      "bytes": 8319,
+      "sha256": "f50bd3c69117f7b2ef7f0d7aa95ef82e61c8cbf1ebec6333a473b47f05ff4352"
+    },
+    {
+      "file": "server/models/weekly-evidence.js",
+      "bytes": 12714,
+      "sha256": "0c3b7132350315a964b16c4c273c864d36f1733c8ef7809e53dc0f58a84d16b5"
+    },
+    {
+      "file": "server/pipeline.cjs",
+      "bytes": 6623,
+      "sha256": "6469f2fcd12907ac22d522f7d8f52d8037b1a5141fde9252d6ffd50b311d86a2"
+    },
+    {
+      "file": "server/predict.cjs",
+      "bytes": 6822,
+      "sha256": "4d3faf5d9742264d6661fd116138d6016b863e624cf677129f90fee959fbeaa1"
+    },
+    {
+      "file": "server/pricing.cjs",
+      "bytes": 3552,
+      "sha256": "b8a1138ddc251523e4a2e9541c63f2acaae2a9282535fc86ad2f65298331cd6f"
+    },
+    {
+      "file": "server/publish-ai.cjs",
+      "bytes": 938,
+      "sha256": "2226984bf1c22f2b3f8eba3b2ab5d4af86b7a47717ea08a2e6d9d7e8c1312635"
+    },
+    {
+      "file": "server/publish.cjs",
+      "bytes": 2006,
+      "sha256": "ece175fde661be637f76cfea2357ec527ff9e3ab8abd5b56606c567f6d68de07"
+    },
+    {
+      "file": "server/review-batch.cjs",
+      "bytes": 1253,
+      "sha256": "ab6f45cd65f5cc10dd708b7f735be7f8e25f2d88a37a70921efb97fae92e6115"
+    },
+    {
+      "file": "server/reviewer.cjs",
+      "bytes": 6744,
+      "sha256": "828b7e44124d194dade4c6df4287b19b056e89932051972781f766406447cf0f"
+    },
+    {
+      "file": "server/runtime.cjs",
+      "bytes": 5128,
+      "sha256": "8bcf6f7d6732b04948df4a40bd04dd40764d0d2e4ea65f55bee80c23be78c84d"
+    },
+    {
+      "file": "server/schema.sql",
+      "bytes": 5714,
+      "sha256": "6624f4b3821c8cf8216dd8198b64b8cdb850b961d9589644e45146fda6f3080d"
+    },
+    {
+      "file": "server/simulator.cjs",
+      "bytes": 2800,
+      "sha256": "479f4f48d15af7127b62d787dd4a10e599aba6b953a8b2fea391b4f71a815c8b"
+    },
+    {
+      "file": "server/store.cjs",
+      "bytes": 2639,
+      "sha256": "1d3e954dd10d589f1be7e1c4fa5b9c348cc7eb90c88b1630974599dcf3cc531a"
+    },
+    {
+      "file": "server/weather.cjs",
+      "bytes": 3815,
+      "sha256": "d23809c4a56c44a7ba031814e1c9332ef4e137940c77adaaf8cfdb16531a755f"
+    },
+    {
+      "file": "Start-Parlay-All-Day.ps1",
+      "bytes": 2656,
+      "sha256": "e7a362e5fdd39ddf3595da3693c89e7446b4bf9fc5450030408a9dbb54f322f7"
+    },
+    {
+      "file": "Stop Parlay All Day.cmd",
+      "bytes": 119,
+      "sha256": "f7596a75e4c38e1856917ed20957af1ce4ccf5af0254b3dd0f807e08366cd648"
+    },
+    {
+      "file": "Stop-Parlay-All-Day.ps1",
+      "bytes": 1071,
+      "sha256": "f2c322900c00fa64acb85792157c8ff06aa88ab5787d67c2e5d848a89ce4215c"
+    },
+    {
+      "file": "test/completion.test.cjs",
+      "bytes": 9470,
+      "sha256": "3a1c19f208f6711f16906ebe3ade7af9b1b5417afc5a6296ff0e44f6021a6b72"
+    },
+    {
+      "file": "test/fixture.cjs",
+      "bytes": 3467,
+      "sha256": "1be36b876beef748a2f82e690184967f94e59fd08cae7b4fb4295afbd889a20c"
+    },
+    {
+      "file": "test/history.test.cjs",
+      "bytes": 4370,
+      "sha256": "8e69a953071dbd769040941b1501ef9fdc390f3fbc0b476da679b15185c77bb0"
+    },
+    {
+      "file": "test/platform.test.cjs",
+      "bytes": 14563,
+      "sha256": "07e0b65d5a54f0b24d5056b9740501b57301b51336567eeb273dc251c83997d8"
+    },
+    {
+      "file": "test/research.test.cjs",
+      "bytes": 3176,
+      "sha256": "9de4aa77500abb2c6b81bd876d8e928a77783f81f85208e173857b259656851c"
+    }
+  ],
+  "notes": [
+    "No provider secrets, private database or raw feeds included.",
+    "Existing Git history retained; no validated betting advantage claimed."
+  ]
+}

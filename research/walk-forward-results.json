@@ -1,0 +1,75 @@
+{
+  "strict": false,
+  "eligible": false,
+  "results": [
+    {
+      "season": 2024,
+      "trainingN": 529,
+      "testN": 521,
+      "trainedThrough": "2023-12-09",
+      "testedFrom": "2024-09-27",
+      "model": {
+        "weight": 0.011721743029775354,
+        "penalty": 100
+      },
+      "mae": 13.062574399345072,
+      "marketMAE": 13.068138195777351,
+      "brier": 0.24887660536822293,
+      "benchmarkBrier": 0.25,
+      "pairedWeekBrierBand": [
+        -0.0025598256750583807,
+        0.0003132559111628246
+      ],
+      "roi": null,
+      "reasonROIUnavailable": "Decision-time exact total prices and settlement availability were not reconstructed."
+    },
+    {
+      "season": 2025,
+      "trainingN": 1050,
+      "testN": 533,
+      "trainedThrough": "2024-12-14",
+      "testedFrom": "2025-09-20",
+      "model": {
+        "weight": 0.21804035645358422,
+        "penalty": 100
+      },
+      "mae": 12.074995289336913,
+      "marketMAE": 12.059099437148218,
+      "brier": 0.25186628494553326,
+      "benchmarkBrier": 0.25,
+      "pairedWeekBrierBand": [
+        -0.00014805267286103504,
+        0.003685250472518932
+      ],
+      "roi": null,
+      "reasonROIUnavailable": "Decision-time exact total prices and settlement availability were not reconstructed."
+    },
+    {
+      "season": 2026,
+      "trainingN": 1583,
+      "testN": 408,
+      "trainedThrough": "2025-12-13",
+      "testedFrom": "2026-09-26",
+      "model": {
+        "weight": 0.18844205792011198,
+        "penalty": 100
+      },
+      "mae": 12.856299497874883,
+      "marketMAE": 12.745710784313726,
+      "brier": 0.2530743167605864,
+      "benchmarkBrier": 0.25,
+      "pairedWeekBrierBand": [
+        0.0016142686814841127,
+        0.004483216515982813
+      ],
+      "roi": null,
+      "reasonROIUnavailable": "Decision-time exact total prices and settlement availability were not reconstructed."
+    }
+  ],
+  "limitations": [
+    "Diagnostic replay only; no automatic champion replacement.",
+    "The retained data and legacy feature hyperparameters were previously inspected. These seasons do not constitute fresh holdouts.",
+    "In strict mode, rows without recorded pre-cutoff feature timestamps are rejected.",
+    "Total-line 50% is a point-line benchmark, not an exact-price no-vig probability."
+  ]
+}

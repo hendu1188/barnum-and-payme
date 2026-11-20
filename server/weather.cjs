@@ -1,0 +1,19 @@
+'use strict';
+const finite=Number.isFinite;
+function duration(text){const m=String(text).match(/^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?)?$/);return m?((+m[1]||0)*86400+(+m[2]||0)*3600+(+m[3]||0)*60+(+m[4]||0))*1000:null;}
+function intervals(field){return (field?.values||[]).map(r=>{const [start,span]=String(r.validTime).split('/'),from=+new Date(start),length=duration(span);return {from,to:from+length,value:r.value};}).filter(r=>finite(r.from)&&finite(r.to)&&r.to>r.from&&finite(r.value));}
+function covers(a,from,to){const sorted=a.filter(r=>r.to>from&&r.from<to).sort((a,b)=>a.from-b.from);let cursor=from;for(const r of sorted){if(r.from>cursor)return false;cursor=Math.max(cursor,r.to);if(cursor>=to)return true;}return false;}
+function assessNws(event,venue,body,receivedAt,source){const p=body?.properties,from=Math.floor(+new Date(event.commence_time)/3600000)*3600000,to=+new Date(event.commence_time)+3*3600000,fields={temperature:intervals(p?.temperature),windSpeed:intervals(p?.windSpeed),windGust:intervals(p?.windGust),quantitativePrecipitation:intervals(p?.quantitativePrecipitation)},unavailable=message=>({status:'unavailable',venue:venue.name,source,message,fetchedAt:receivedAt});
+ if(!p||p.temperature?.uom!=='wmoUnit:degC'||p.windSpeed?.uom!=='wmoUnit:km_h-1'||p.windGust?.uom!=='wmoUnit:km_h-1'||p.quantitativePrecipitation?.uom!=='wmoUnit:mm')return unavailable('NWS forecast units could not be verified.');
+ if(Object.values(fields).some(a=>!covers(a,from,to)))return unavailable('NWS forecast does not fully cover kickoff and the game window.');
+ const overlap=a=>a.filter(r=>r.to>from&&r.from<to),temp=fields.temperature.find(r=>r.from<=+new Date(event.commence_time)&&r.to>+new Date(event.commence_time));if(!temp)return unavailable('Kickoff temperature is missing.');
+ const windMph=Math.max(...overlap(fields.windSpeed).map(r=>r.value))*.6213711922,gustMph=Math.max(...overlap(fields.windGust).map(r=>r.value))*.6213711922;
+ // NWS precipitation often spans six hours. Include each overlapping interval
+ // once as an upper bound, rather than pretending its probability is inches or
+ // inventing an hourly allocation. This can only make the weather screen stricter.
+ const rain=overlap(fields.quantitativePrecipitation),precipIn=rain.reduce((s,r)=>s+Math.max(0,r.value),0)/25.4,precipIsUpperBound=rain.some(r=>r.from<from||r.to>to);
+ return {status:'available',venue:venue.name,tempF:temp.value*1.8+32,windMph,gustMph,precipIn,precipIsUpperBound,forecastFor:event.commence_time,fetchedAt:receivedAt,publishedAt:p.updateTime||null,source,provider:'National Weather Service',screenTriggered:windMph>=20||gustMph>=30||precipIn>=.3,message:'NWS grid forecast for the full game window.'+(precipIsUpperBound?' Rain is a conservative upper bound from overlapping forecast intervals, not an exact three-hour forecast.':'')};
+}
+async function pool(items,limit,fn){let next=0;await Promise.all(Array.from({length:Math.min(items.length,limit)},async()=>{while(next<items.length){const i=next++;await fn(items[i],i);}}));}
+function indexBatches(store){for(const raw of store.all("SELECT * FROM raw_fetches WHERE resource LIKE 'weather:%' AND provider='weather' ORDER BY received_at DESC LIMIT 500")){const ids=raw.resource.slice('weather:'.length).split('-');if(!ids.every(x=>/^\d+$/.test(x)))continue;const body=require('./store.cjs').parse(raw),a=Array.isArray(body)?body:[body];if(a.length!==ids.length)continue;ids.forEach((id,i)=>store.run('INSERT INTO weather_cache VALUES(?,?,?,?) ON CONFLICT(venue_id) DO UPDATE SET raw_id=excluded.raw_id,forecast_index=excluded.forecast_index,expires_at=excluded.expires_at WHERE excluded.expires_at>weather_cache.expires_at',id,raw.id,i,raw.expires_at));}}
+module.exports={duration,intervals,covers,assessNws,pool,indexBatches};

@@ -1,0 +1,6 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),{DatabaseSync}=require('node:sqlite');
+const {dataPaths}=require('../server/runtime.cjs'),{performance}=require('../server/ledger.cjs');
+function report(root=path.resolve(__dirname,'..'),env=process.env){const file=dataPaths(root,env).database;if(!fs.existsSync(file))return {status:'WAITING_FOR_RECORDED_DATA',eligible:false,reason:'Enable collection to record real pregame forecasts. No database or reconstructed results were substituted.'};const db=new DatabaseSync(file,{readOnly:true});try{const store={all:(sql,...args)=>db.prepare(sql).all(...args),get:(sql,...args)=>db.prepare(sql).get(...args)},results=performance(store);return {status:'PROSPECTIVE_MONITORING',eligible:false,results,limitations:['Recorded first forecasts and original prices only; pending games are not outcomes.','This report does not fit or promote a model. Release requires independent chronological holdouts, calibration and exact-price performance with uncertainty.','Previously inspected historical diagnostics cannot establish a fresh betting advantage.']};}finally{db.close();}}
+if(require.main===module)console.log(JSON.stringify(report(),null,2));
+module.exports={report};

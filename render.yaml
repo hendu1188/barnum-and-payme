@@ -1,0 +1,37 @@
+# GitHub stores the source. Render runs this Node service and its persistent disk.
+# Creating this service requires a paid disk-compatible plan; no deployment is
+# performed merely by committing this file.
+services:
+  - type: web
+    name: parlay-all-day
+    runtime: node
+    plan: starter
+    region: oregon
+    numInstances: 1
+    buildCommand: npm ci --ignore-scripts --omit=dev
+    startCommand: node --no-warnings server/main.cjs
+    healthCheckPath: /healthz
+    autoDeployTrigger: checksPass
+    disk:
+      name: parlay-history
+      mountPath: /var/data/parlay
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: PARLAY_DEPLOYMENT
+        value: hosted
+      - key: PARLAY_DATA_DIR
+        value: /var/data/parlay
+      - key: PARLAY_USERNAME
+        value: owner
+      - key: PARLAY_PASSWORD
+        generateValue: true
+      - key: PARLAY_RESEARCH_TOKEN
+        generateValue: true
+      - key: ODDS_API_KEY
+        sync: false
+      - key: CFBD_API_KEY
+        sync: false
+      - key: PARLAY_COLLECTION_ENABLED
+        value: "false"

@@ -1,0 +1,22 @@
+name: Verify Parlay All Day
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - run: npm run check
+      - run: npm test
+      # Provider keys are intentionally not available to CI. All tests use
+      # explicit synthetic fixtures and local HTTP endpoints.

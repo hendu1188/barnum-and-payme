@@ -1,0 +1,40 @@
+{
+  "version": "drive-totals-v1",
+  "options": {
+    "priorDrives": 100,
+    "priorGames": 4
+  },
+  "calibration": {
+    "intercept": -5.3754607230756974,
+    "slope": 1.1116750311508343
+  },
+  "trainingN": 529,
+  "development": {
+    "n": 521,
+    "mae": 13.13479956615668,
+    "marketMAE": 13.068138195777351,
+    "bias": -0.03830200575822254
+  },
+  "diagnostics": {
+    "2023": {
+      "n": 529,
+      "mae": 12.946507547348414,
+      "marketMAE": 12.34593572778828,
+      "bias": -1.8629920122859337e-14
+    },
+    "2024": {
+      "n": 521,
+      "mae": 13.13479956615668,
+      "marketMAE": 13.068138195777351,
+      "bias": -0.03830200575822254
+    },
+    "2025": {
+      "n": 533,
+      "mae": 12.41509817317467,
+      "marketMAE": 12.059099437148218,
+      "bias": 0.8374783024376302
+    }
+  },
+  "qualified": false,
+  "selection": "Fit score calibration on 2023; select shrinkage using 2024 MAE. Reused 2025 is diagnostic only."
+}

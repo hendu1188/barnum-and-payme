@@ -1,0 +1,10 @@
+data/
+seed/
+research/reconstructed-cases.json
+public/NCAA-AI-Research.js
+.env
+.env.*
+!.env.example
+.git/
+*.log
+test/

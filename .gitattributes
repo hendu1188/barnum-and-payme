@@ -1,0 +1,4 @@
+# Keep frozen model checksums identical after checkout on Windows and Linux.
+* text=auto eol=lf
+*.png -text
+*.jpg -text

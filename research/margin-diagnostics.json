@@ -1,0 +1,123 @@
+{
+  "modelVersion": "unified-score-v1",
+  "parameterArtifact": "17b8a15272a430aa2fe94dd6faa0e340167968a1761c303837d51fb01f138129",
+  "limitations": [
+    "Archive prices have no decision-time timestamps. These are retrospective comparisons, not executable weekly strategy returns.",
+    "No historical availability/weather states are reconstructed. 2025 is reused; 2026 is an additional retrospective sample, not a prospective betting record.",
+    "Spread/total archive quotes do not provide associated juice; their 50% comparison is a point-line benchmark only."
+  ],
+  "seasons": {
+    "2025": {
+      "eligibleGames": 578,
+      "providers": [
+        "DraftKings"
+      ],
+      "markets": {
+        "spread": {
+          "n": 578,
+          "decided": 567,
+          "pushes": 11,
+          "brier": 0.2509721706686175,
+          "benchmarkBrier": 0.25,
+          "meanPredicted": 0.49889722134312214,
+          "meanObserved": 0.5220458553791887,
+          "pairedBrierDifferenceBand": [
+            -0.0017944739279046316,
+            0.0040403090305224255
+          ],
+          "weekBlocks": 14
+        },
+        "total": {
+          "n": 578,
+          "decided": 578,
+          "pushes": 0,
+          "brier": 0.2517266732070739,
+          "benchmarkBrier": 0.25,
+          "meanPredicted": 0.509594929588551,
+          "meanObserved": 0.4757785467128028,
+          "pairedBrierDifferenceBand": [
+            -0.00015372676579677912,
+            0.0035304601607053674
+          ],
+          "weekBlocks": 14
+        },
+        "moneyline": {
+          "n": 578,
+          "decided": 578,
+          "pushes": 0,
+          "brier": 0.1815633540429803,
+          "benchmarkBrier": 0.18193520117992162,
+          "meanPredicted": 0.5526911541485423,
+          "meanObserved": 0.5726643598615917,
+          "pairedBrierDifferenceBand": [
+            -0.002075245703501059,
+            0.0015256451742526951
+          ],
+          "weekBlocks": 14
+        }
+      },
+      "pointErrors": {
+        "margin": 11.90306559129256,
+        "marketMargin": 11.846020761245676,
+        "total": 12.408436255278604,
+        "marketTotal": 12.379325259515571
+      }
+    },
+    "2026": {
+      "eligibleGames": 408,
+      "providers": [
+        "DraftKings"
+      ],
+      "markets": {
+        "spread": {
+          "n": 408,
+          "decided": 402,
+          "pushes": 6,
+          "brier": 0.2489270580302278,
+          "benchmarkBrier": 0.25,
+          "meanPredicted": 0.4988654683494908,
+          "meanObserved": 0.5149253731343284,
+          "pairedBrierDifferenceBand": [
+            -0.003344147459572105,
+            0.0014286486396104469
+          ],
+          "weekBlocks": 9
+        },
+        "total": {
+          "n": 408,
+          "decided": 408,
+          "pushes": 0,
+          "brier": 0.2556642684480935,
+          "benchmarkBrier": 0.25,
+          "meanPredicted": 0.510647812627237,
+          "meanObserved": 0.46568627450980393,
+          "pairedBrierDifferenceBand": [
+            0.002032478096051973,
+            0.008803247880165649
+          ],
+          "weekBlocks": 9
+        },
+        "moneyline": {
+          "n": 408,
+          "decided": 408,
+          "pushes": 0,
+          "brier": 0.19864278428264293,
+          "benchmarkBrier": 0.20029658571511902,
+          "meanPredicted": 0.561184022220084,
+          "meanObserved": 0.5612745098039216,
+          "pairedBrierDifferenceBand": [
+            -0.0030809323715817803,
+            -0.00005743502560816563
+          ],
+          "weekBlocks": 9
+        }
+      },
+      "pointErrors": {
+        "margin": 12.061292934983035,
+        "marketMargin": 12.048406862745098,
+        "total": 12.90898419044102,
+        "marketTotal": 12.745710784313726
+      }
+    }
+  }
+}

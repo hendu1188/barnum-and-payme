@@ -1,0 +1,1264 @@
+{
+  "version": "unified-score-v1",
+  "family": "discrete-logistic-keynumbers",
+  "marketWeights": {
+    "margin": 0.2151126499290897,
+    "total": 0.24756838104941906
+  },
+  "scales": {
+    "margin": 9,
+    "total": 8
+  },
+  "offsets": {
+    "margin": 0,
+    "total": 0
+  },
+  "favoriteScaleSlope": 0,
+  "keyWeights": {
+    "1": 1.0645728421427216,
+    "2": 1.133997617363282,
+    "3": 1.3402499605298686,
+    "4": 1.1488947253376431,
+    "5": 0.8842987460196422,
+    "6": 1.0242060682599001,
+    "7": 1.3057939323736205,
+    "8": 0.9725214488450751,
+    "9": 0.7697324127884465,
+    "10": 1.4779876140840196,
+    "11": 0.9277260410048105,
+    "12": 0.7918251979606964,
+    "13": 0.7255852820273299,
+    "14": 0.950772713721361,
+    "15": 0.9605897093979798,
+    "16": 0.9708700629903331,
+    "17": 0.9815531776649191,
+    "18": 0.9162255538551426,
+    "19": 0.8490595472404553,
+    "20": 0.9361125193006984
+  },
+  "marginCoefficients": [
+    5.631536032208663,
+    12.412877164870583,
+    2.791030092429448,
+    1.8682115044904266
+  ],
+  "marginTraining": {
+    "season": 2023,
+    "n": 529,
+    "penalty": 10,
+    "ridgeCandidates": [
+      {
+        "penalty": 10,
+        "mae": 12.996166681853312,
+        "n": 423
+      },
+      {
+        "penalty": 1,
+        "mae": 13.104174984548482,
+        "n": 423
+      },
+      {
+        "penalty": 0.1,
+        "mae": 13.120261601964732,
+        "n": 423
+      },
+      {
+        "penalty": 100,
+        "mae": 13.239702952400226,
+        "n": 423
+      }
+    ]
+  },
+  "reference": [
+    {
+      "modelMargin": 16.367466288996436,
+      "actualMargin": 4,
+      "modelTotal": 55.258473007619415,
+      "actualTotal": 72,
+      "week": 5,
+      "gameId": 401634767
+    },
+    {
+      "modelMargin": 4.759132966963527,
+      "actualMargin": 44,
+      "modelTotal": 46.31815727762957,
+      "actualTotal": 50,
+      "week": 5,
+      "gameId": 401629032
+    },
+    {
+      "modelMargin": 6.156840033036968,
+      "actualMargin": 14,
+      "modelTotal": 50.540390064765994,
+      "actualTotal": 70,
+      "week": 5,
+      "gameId": 401628496
+    },
+    {
+      "modelMargin": 5.012151644708386,
+      "actualMargin": 35,
+      "modelTotal": 60.63947440074063,
+      "actualTotal": 55,
+      "week": 5,
+      "gameId": 401645337
+    },
+    {
+      "modelMargin": 1.9527834414012115,
+      "actualMargin": -6,
+      "modelTotal": 47.45921655582017,
+      "actualTotal": 62,
+      "week": 5,
+      "gameId": 401636880
+    },
+    {
+      "modelMargin": 5.896983981034725,
+      "actualMargin": 22,
+      "modelTotal": 56.496594508975136,
+      "actualTotal": 62,
+      "week": 5,
+      "gameId": 401636883
+    },
+    {
+      "modelMargin": 7.210362411512295,
+      "actualMargin": 1,
+      "modelTotal": 49.27130655680363,
+      "actualTotal": 41,
+      "week": 5,
+      "gameId": 401635560
+    },
+    {
+      "modelMargin": 11.801961328296734,
+      "actualMargin": 3,
+      "modelTotal": 37.19344374986957,
+      "actualTotal": 51,
+      "week": 5,
+      "gameId": 401628497
+    },
+    {
+      "modelMargin": 14.45164864298633,
+      "actualMargin": -3,
+      "modelTotal": 50.71120161960227,
+      "actualTotal": 37,
+      "week": 5,
+      "gameId": 401628377
+    },
+    {
+      "modelMargin": -13.732987548313913,
+      "actualMargin": -19,
+      "modelTotal": 47.980131487490596,
+      "actualTotal": 85,
+      "week": 5,
+      "gameId": 401644739
+    },
+    {
+      "modelMargin": -0.2047146268083675,
+      "actualMargin": -6,
+      "modelTotal": 44.74372502855179,
+      "actualTotal": 48,
+      "week": 5,
+      "gameId": 401628375
+    },
+    {
+      "modelMargin": 10.049597591981286,
+      "actualMargin": 20,
+      "modelTotal": 48.071380318939916,
+      "actualTotal": 40,
+      "week": 5,
+      "gameId": 401644738
+    },
+    {
+      "modelMargin": 1.7197347850379658,
+      "actualMargin": -11,
+      "modelTotal": 58.451132664242095,
+      "actualTotal": 65,
+      "week": 5,
+      "gameId": 401636882
+    },
+    {
+      "modelMargin": 15.541053444951933,
+      "actualMargin": 3,
+      "modelTotal": 44.886126405132536,
+      "actualTotal": 43,
+      "week": 5,
+      "gameId": 401629043
+    },
+    {
+      "modelMargin": 6.4168012406895185,
+      "actualMargin": 4,
+      "modelTotal": 50.7321454972134,
+      "actualTotal": 38,
+      "week": 5,
+      "gameId": 401628373
+    },
+    {
+      "modelMargin": 2.6695880719608827,
+      "actualMargin": 10,
+      "modelTotal": 53.53689502782556,
+      "actualTotal": 50,
+      "week": 5,
+      "gameId": 401645334
+    },
+    {
+      "modelMargin": 0.6507991619512823,
+      "actualMargin": 1,
+      "modelTotal": 56.46486363254053,
+      "actualTotal": 41,
+      "week": 5,
+      "gameId": 401635562
+    },
+    {
+      "modelMargin": 36.023657905343484,
+      "actualMargin": 22,
+      "modelTotal": 57.76042069162094,
+      "actualTotal": 48,
+      "week": 5,
+      "gameId": 401628378
+    },
+    {
+      "modelMargin": 7.709534252073529,
+      "actualMargin": 32,
+      "modelTotal": 64.47597701686757,
+      "actualTotal": 72,
+      "week": 5,
+      "gameId": 401645336
+    },
+    {
+      "modelMargin": 25.291692764754202,
+      "actualMargin": 17,
+      "modelTotal": 60.84630415767418,
+      "actualTotal": 31,
+      "week": 5,
+      "gameId": 401641025
+    },
+    {
+      "modelMargin": -22.818236856750556,
+      "actualMargin": -31,
+      "modelTotal": 49.41360357328633,
+      "actualTotal": 45,
+      "week": 5,
+      "gameId": 401628498
+    },
+    {
+      "modelMargin": 18.488879511758796,
+      "actualMargin": 14,
+      "modelTotal": 48.29530135138009,
+      "actualTotal": 28,
+      "week": 5,
+      "gameId": 401628495
+    },
+    {
+      "modelMargin": 18.080352557905755,
+      "actualMargin": 32,
+      "modelTotal": 62.68724075658634,
+      "actualTotal": 52,
+      "week": 5,
+      "gameId": 401628376
+    },
+    {
+      "modelMargin": 3.5414884237657276,
+      "actualMargin": 3,
+      "modelTotal": 58.675922652870135,
+      "actualTotal": 85,
+      "week": 5,
+      "gameId": 401636884
+    },
+    {
+      "modelMargin": -6.4136581287264605,
+      "actualMargin": -10,
+      "modelTotal": 55.43917372698424,
+      "actualTotal": 90,
+      "week": 5,
+      "gameId": 401641035
+    },
+    {
+      "modelMargin": 6.369448210791898,
+      "actualMargin": 26,
+      "modelTotal": 47.35189071656885,
+      "actualTotal": 58,
+      "week": 5,
+      "gameId": 401635563
+    },
+    {
+      "modelMargin": -11.412705480310368,
+      "actualMargin": -21,
+      "modelTotal": 55.51351520540155,
+      "actualTotal": 55,
+      "week": 6,
+      "gameId": 401643797
+    },
+    {
+      "modelMargin": -8.904355865444556,
+      "actualMargin": -20,
+      "modelTotal": 50.17596693516877,
+      "actualTotal": 62,
+      "week": 6,
+      "gameId": 401641029
+    },
+    {
+      "modelMargin": -14.217308792327117,
+      "actualMargin": -39,
+      "modelTotal": 50.36856550794875,
+      "actualTotal": 87,
+      "week": 6,
+      "gameId": 401641001
+    },
+    {
+      "modelMargin": 15.050948285901054,
+      "actualMargin": -11,
+      "modelTotal": 52.00500819307031,
+      "actualTotal": 49,
+      "week": 6,
+      "gameId": 401636891
+    },
+    {
+      "modelMargin": 22.602571004341872,
+      "actualMargin": 21,
+      "modelTotal": 52.513664849902575,
+      "actualTotal": 41,
+      "week": 6,
+      "gameId": 401628506
+    },
+    {
+      "modelMargin": 7.443017578604909,
+      "actualMargin": -3,
+      "modelTotal": 55.33042757258144,
+      "actualTotal": 85,
+      "week": 6,
+      "gameId": 401634779
+    },
+    {
+      "modelMargin": 1.9789214340121812,
+      "actualMargin": 10,
+      "modelTotal": 52.249194528860606,
+      "actualTotal": 38,
+      "week": 6,
+      "gameId": 401635567
+    },
+    {
+      "modelMargin": -8.530775309622946,
+      "actualMargin": -27,
+      "modelTotal": 40.99190408291491,
+      "actualTotal": 41,
+      "week": 6,
+      "gameId": 401643722
+    },
+    {
+      "modelMargin": 4.526959560776433,
+      "actualMargin": -4,
+      "modelTotal": 54.21308410352791,
+      "actualTotal": 64,
+      "week": 6,
+      "gameId": 401635638
+    },
+    {
+      "modelMargin": 5.393279011519114,
+      "actualMargin": -7,
+      "modelTotal": 56.11332257970456,
+      "actualTotal": 61,
+      "week": 6,
+      "gameId": 401635571
+    },
+    {
+      "modelMargin": -1.7623208846756369,
+      "actualMargin": -10,
+      "modelTotal": 62.77058375731791,
+      "actualTotal": 58,
+      "week": 6,
+      "gameId": 401635572
+    },
+    {
+      "modelMargin": 1.6751794600191197,
+      "actualMargin": 31,
+      "modelTotal": 47.36684438558171,
+      "actualTotal": 51,
+      "week": 6,
+      "gameId": 401628383
+    },
+    {
+      "modelMargin": 28.03125993120804,
+      "actualMargin": 16,
+      "modelTotal": 47.629159757259686,
+      "actualTotal": 38,
+      "week": 6,
+      "gameId": 401628510
+    },
+    {
+      "modelMargin": 14.57284806874865,
+      "actualMargin": 14,
+      "modelTotal": 42.18679491823332,
+      "actualTotal": 54,
+      "week": 6,
+      "gameId": 401629044
+    },
+    {
+      "modelMargin": 11.811244120250272,
+      "actualMargin": 46,
+      "modelTotal": 46.822356397928175,
+      "actualTotal": 58,
+      "week": 6,
+      "gameId": 401628509
+    },
+    {
+      "modelMargin": -18.152058844348897,
+      "actualMargin": -51,
+      "modelTotal": 52.49371238348328,
+      "actualTotal": 91,
+      "week": 6,
+      "gameId": 401645338
+    },
+    {
+      "modelMargin": -8.482675161528586,
+      "actualMargin": -3,
+      "modelTotal": 56.69708119990854,
+      "actualTotal": 87,
+      "week": 6,
+      "gameId": 401644741
+    },
+    {
+      "modelMargin": 20.655337489776763,
+      "actualMargin": 18,
+      "modelTotal": 49.61105512605983,
+      "actualTotal": 44,
+      "week": 6,
+      "gameId": 401628381
+    },
+    {
+      "modelMargin": -8.328384857857879,
+      "actualMargin": -24,
+      "modelTotal": 53.24605369912466,
+      "actualTotal": 30,
+      "week": 6,
+      "gameId": 401628382
+    },
+    {
+      "modelMargin": -9.21763999049558,
+      "actualMargin": 31,
+      "modelTotal": 47.98748396884438,
+      "actualTotal": 79,
+      "week": 6,
+      "gameId": 401645340
+    },
+    {
+      "modelMargin": 17.316524873702896,
+      "actualMargin": 9,
+      "modelTotal": 50.97227231454541,
+      "actualTotal": 49,
+      "week": 6,
+      "gameId": 401629033
+    },
+    {
+      "modelMargin": -9.595570440929606,
+      "actualMargin": -24,
+      "modelTotal": 51.28676504765958,
+      "actualTotal": 38,
+      "week": 6,
+      "gameId": 401635573
+    },
+    {
+      "modelMargin": 5.846239148797887,
+      "actualMargin": 10,
+      "modelTotal": 45.26167088181864,
+      "actualTotal": 50,
+      "week": 6,
+      "gameId": 401644684
+    },
+    {
+      "modelMargin": 2.7180419047023823,
+      "actualMargin": 15,
+      "modelTotal": 56.34346347740912,
+      "actualTotal": 89,
+      "week": 6,
+      "gameId": 401643799
+    },
+    {
+      "modelMargin": -16.193112189194068,
+      "actualMargin": -7,
+      "modelTotal": 50.27630946568022,
+      "actualTotal": 47,
+      "week": 6,
+      "gameId": 401644740
+    },
+    {
+      "modelMargin": -11.072576715224054,
+      "actualMargin": -17,
+      "modelTotal": 42.511341927959734,
+      "actualTotal": 65,
+      "week": 6,
+      "gameId": 401628503
+    },
+    {
+      "modelMargin": 17.231982277487308,
+      "actualMargin": 28,
+      "modelTotal": 48.42643006452551,
+      "actualTotal": 42,
+      "week": 6,
+      "gameId": 401628504
+    },
+    {
+      "modelMargin": 5.4864123242692475,
+      "actualMargin": 7,
+      "modelTotal": 42.65597084097035,
+      "actualTotal": 21,
+      "week": 6,
+      "gameId": 401628508
+    },
+    {
+      "modelMargin": 2.453462648172941,
+      "actualMargin": -24,
+      "modelTotal": 63.307143480084456,
+      "actualTotal": 52,
+      "week": 6,
+      "gameId": 401636890
+    },
+    {
+      "modelMargin": -23.252664650271576,
+      "actualMargin": 5,
+      "modelTotal": 54.979327948867294,
+      "actualTotal": 75,
+      "week": 6,
+      "gameId": 401628384
+    },
+    {
+      "modelMargin": 11.344598602617749,
+      "actualMargin": 8,
+      "modelTotal": 47.50167951141732,
+      "actualTotal": 70,
+      "week": 6,
+      "gameId": 401643724
+    },
+    {
+      "modelMargin": 4.902947004434692,
+      "actualMargin": 8,
+      "modelTotal": 52.6276424182204,
+      "actualTotal": 82,
+      "week": 6,
+      "gameId": 401643798
+    },
+    {
+      "modelMargin": -17.0879961324138,
+      "actualMargin": 2,
+      "modelTotal": 50.45009752849956,
+      "actualTotal": 40,
+      "week": 6,
+      "gameId": 401643801
+    },
+    {
+      "modelMargin": 26.233065472639,
+      "actualMargin": 32,
+      "modelTotal": 66.16223319734596,
+      "actualTotal": 92,
+      "week": 6,
+      "gameId": 401643723
+    },
+    {
+      "modelMargin": -2.9760655976427683,
+      "actualMargin": 2,
+      "modelTotal": 60.884872006954176,
+      "actualTotal": 34,
+      "week": 6,
+      "gameId": 401643800
+    },
+    {
+      "modelMargin": -14.758073636668222,
+      "actualMargin": -16,
+      "modelTotal": 48.708599155289434,
+      "actualTotal": 42,
+      "week": 6,
+      "gameId": 401635569
+    },
+    {
+      "modelMargin": 12.795331414683579,
+      "actualMargin": 22,
+      "modelTotal": 46.293337183526404,
+      "actualTotal": 64,
+      "week": 6,
+      "gameId": 401636889
+    },
+    {
+      "modelMargin": 0.7853693544653745,
+      "actualMargin": 10,
+      "modelTotal": 40.94508138711435,
+      "actualTotal": 44,
+      "week": 6,
+      "gameId": 401628505
+    },
+    {
+      "modelMargin": -8.298421189888156,
+      "actualMargin": 7,
+      "modelTotal": 46.31754172070568,
+      "actualTotal": 41,
+      "week": 6,
+      "gameId": 401628507
+    },
+    {
+      "modelMargin": -14.772335443462346,
+      "actualMargin": 5,
+      "modelTotal": 57.004337480514884,
+      "actualTotal": 33,
+      "week": 6,
+      "gameId": 401628379
+    },
+    {
+      "modelMargin": -0.028110605902979535,
+      "actualMargin": 11,
+      "modelTotal": 61.07064072605174,
+      "actualTotal": 37,
+      "week": 6,
+      "gameId": 401628380
+    },
+    {
+      "modelMargin": 8.207561044676806,
+      "actualMargin": 10,
+      "modelTotal": 51.80189503784743,
+      "actualTotal": 38,
+      "week": 6,
+      "gameId": 401635570
+    },
+    {
+      "modelMargin": 3.0241429174252654,
+      "actualMargin": 4,
+      "modelTotal": 50.46859176220379,
+      "actualTotal": 66,
+      "week": 6,
+      "gameId": 401636888
+    },
+    {
+      "modelMargin": -9.519193640539973,
+      "actualMargin": -1,
+      "modelTotal": 53.66103093096035,
+      "actualTotal": 77,
+      "week": 6,
+      "gameId": 401635568
+    },
+    {
+      "modelMargin": 5.451551687517405,
+      "actualMargin": -6,
+      "modelTotal": 62.993194548543144,
+      "actualTotal": 50,
+      "week": 6,
+      "gameId": 401636887
+    },
+    {
+      "modelMargin": 15.573901085775136,
+      "actualMargin": 7,
+      "modelTotal": 54.97741639566891,
+      "actualTotal": 55,
+      "week": 7,
+      "gameId": 401640982
+    },
+    {
+      "modelMargin": 19.557318841137633,
+      "actualMargin": 41,
+      "modelTotal": 59.728283208089586,
+      "actualTotal": 67,
+      "week": 7,
+      "gameId": 401641002
+    },
+    {
+      "modelMargin": 8.859755667705965,
+      "actualMargin": 32,
+      "modelTotal": 60.15333786322143,
+      "actualTotal": 46,
+      "week": 7,
+      "gameId": 401643803
+    },
+    {
+      "modelMargin": 5.359240860306949,
+      "actualMargin": 27,
+      "modelTotal": 48.516521166352845,
+      "actualTotal": 69,
+      "week": 7,
+      "gameId": 401641009
+    },
+    {
+      "modelMargin": 17.678948573941778,
+      "actualMargin": 27,
+      "modelTotal": 55.434894053289575,
+      "actualTotal": 61,
+      "week": 7,
+      "gameId": 401641030
+    },
+    {
+      "modelMargin": 11.277389315391774,
+      "actualMargin": -27,
+      "modelTotal": 46.358907393520774,
+      "actualTotal": 47,
+      "week": 7,
+      "gameId": 401628513
+    },
+    {
+      "modelMargin": -19.028983809480756,
+      "actualMargin": -16,
+      "modelTotal": 66.13044613755277,
+      "actualTotal": 84,
+      "week": 7,
+      "gameId": 401643733
+    },
+    {
+      "modelMargin": -4.7887129913037985,
+      "actualMargin": 8,
+      "modelTotal": 47.77595490273412,
+      "actualTotal": 46,
+      "week": 7,
+      "gameId": 401636892
+    },
+    {
+      "modelMargin": 26.10748326139603,
+      "actualMargin": 34,
+      "modelTotal": 54.80697665624287,
+      "actualTotal": 54,
+      "week": 7,
+      "gameId": 401645342
+    },
+    {
+      "modelMargin": -19.36878070422508,
+      "actualMargin": -35,
+      "modelTotal": 63.056205431834535,
+      "actualTotal": 63,
+      "week": 7,
+      "gameId": 401635576
+    },
+    {
+      "modelMargin": -2.660308798784362,
+      "actualMargin": -7,
+      "modelTotal": 58.887694327920805,
+      "actualTotal": 75,
+      "week": 7,
+      "gameId": 401635577
+    },
+    {
+      "modelMargin": -25.32535082463986,
+      "actualMargin": -42,
+      "modelTotal": 52.623561244789634,
+      "actualTotal": 48,
+      "week": 7,
+      "gameId": 401628389
+    },
+    {
+      "modelMargin": 1.1217775805381185,
+      "actualMargin": -35,
+      "modelTotal": 45.07576525526823,
+      "actualTotal": 49,
+      "week": 7,
+      "gameId": 401628517
+    },
+    {
+      "modelMargin": 1.1841695909588468,
+      "actualMargin": 24,
+      "modelTotal": 42.999629920818805,
+      "actualTotal": 56,
+      "week": 7,
+      "gameId": 401628512
+    },
+    {
+      "modelMargin": -2.7361380830387856,
+      "actualMargin": -2,
+      "modelTotal": 60.58193236125237,
+      "actualTotal": 72,
+      "week": 7,
+      "gameId": 401644743
+    },
+    {
+      "modelMargin": -10.155726336926358,
+      "actualMargin": 15,
+      "modelTotal": 46.64015786831407,
+      "actualTotal": 45,
+      "week": 7,
+      "gameId": 401644745
+    },
+    {
+      "modelMargin": 20.039505431458206,
+      "actualMargin": 2,
+      "modelTotal": 52.45941196305465,
+      "actualTotal": 52,
+      "week": 7,
+      "gameId": 401628385
+    },
+    {
+      "modelMargin": -1.8974485572443704,
+      "actualMargin": -24,
+      "modelTotal": 46.02580116591779,
+      "actualTotal": 52,
+      "week": 7,
+      "gameId": 401644685
+    },
+    {
+      "modelMargin": 21.819002980111556,
+      "actualMargin": 1,
+      "modelTotal": 48.30465402615105,
+      "actualTotal": 99,
+      "week": 7,
+      "gameId": 401628511
+    },
+    {
+      "modelMargin": -10.096551428286272,
+      "actualMargin": -18,
+      "modelTotal": 60.158203378885794,
+      "actualTotal": 24,
+      "week": 7,
+      "gameId": 401645341
+    },
+    {
+      "modelMargin": -3.419328415865892,
+      "actualMargin": -3,
+      "modelTotal": 51.113120716012354,
+      "actualTotal": 63,
+      "week": 7,
+      "gameId": 401628516
+    },
+    {
+      "modelMargin": 2.696079039230608,
+      "actualMargin": -10,
+      "modelTotal": 47.17719745672119,
+      "actualTotal": 24,
+      "week": 7,
+      "gameId": 401644744
+    },
+    {
+      "modelMargin": 9.497633848604968,
+      "actualMargin": 10,
+      "modelTotal": 50.25336051785315,
+      "actualTotal": 58,
+      "week": 7,
+      "gameId": 401644742
+    },
+    {
+      "modelMargin": 1.4066939204135775,
+      "actualMargin": -6,
+      "modelTotal": 57.089441988012894,
+      "actualTotal": 32,
+      "week": 7,
+      "gameId": 401636895
+    },
+    {
+      "modelMargin": -15.801950967650306,
+      "actualMargin": -31,
+      "modelTotal": 50.01278183909172,
+      "actualTotal": 37,
+      "week": 7,
+      "gameId": 401628390
+    },
+    {
+      "modelMargin": -7.134086894086767,
+      "actualMargin": -4,
+      "modelTotal": 53.99456398912942,
+      "actualTotal": 44,
+      "week": 7,
+      "gameId": 401635578
+    },
+    {
+      "modelMargin": 2.9598852762729084,
+      "actualMargin": -7,
+      "modelTotal": 54.13681936965619,
+      "actualTotal": 35,
+      "week": 7,
+      "gameId": 401643805
+    },
+    {
+      "modelMargin": 1.6374050232694093,
+      "actualMargin": -3,
+      "modelTotal": 44.26520751802013,
+      "actualTotal": 51,
+      "week": 7,
+      "gameId": 401643732
+    },
+    {
+      "modelMargin": 3.226814578039245,
+      "actualMargin": 2,
+      "modelTotal": 57.043702540507454,
+      "actualTotal": 32,
+      "week": 7,
+      "gameId": 401635575
+    },
+    {
+      "modelMargin": 24.484451554715946,
+      "actualMargin": 42,
+      "modelTotal": 46.768452557197406,
+      "actualTotal": 56,
+      "week": 7,
+      "gameId": 401628981
+    },
+    {
+      "modelMargin": -3.5166378486488084,
+      "actualMargin": -2,
+      "modelTotal": 51.57987289482002,
+      "actualTotal": 52,
+      "week": 7,
+      "gameId": 401644746
+    },
+    {
+      "modelMargin": 3.2350622306475425,
+      "actualMargin": 22,
+      "modelTotal": 49.50133503575401,
+      "actualTotal": 60,
+      "week": 7,
+      "gameId": 401636893
+    },
+    {
+      "modelMargin": 32.0192414937124,
+      "actualMargin": 10,
+      "modelTotal": 52.73934454242505,
+      "actualTotal": 72,
+      "week": 7,
+      "gameId": 401628386
+    },
+    {
+      "modelMargin": 5.494579570090573,
+      "actualMargin": 17,
+      "modelTotal": 42.663395720245035,
+      "actualTotal": 59,
+      "week": 7,
+      "gameId": 401643807
+    },
+    {
+      "modelMargin": -2.5324604530862245,
+      "actualMargin": -8,
+      "modelTotal": 59.85411437219447,
+      "actualTotal": 42,
+      "week": 7,
+      "gameId": 401643730
+    },
+    {
+      "modelMargin": 15.01550845803338,
+      "actualMargin": 6,
+      "modelTotal": 54.98754963061312,
+      "actualTotal": 40,
+      "week": 7,
+      "gameId": 401628391
+    },
+    {
+      "modelMargin": -3.0462920398694613,
+      "actualMargin": 2,
+      "modelTotal": 51.92650692390866,
+      "actualTotal": 56,
+      "week": 7,
+      "gameId": 401645344
+    },
+    {
+      "modelMargin": 13.699555711291756,
+      "actualMargin": 32,
+      "modelTotal": 63.438572864869016,
+      "actualTotal": 50,
+      "week": 7,
+      "gameId": 401643808
+    },
+    {
+      "modelMargin": 5.650970783862622,
+      "actualMargin": 15,
+      "modelTotal": 56.28697359218704,
+      "actualTotal": 89,
+      "week": 7,
+      "gameId": 401643727
+    },
+    {
+      "modelMargin": -5.229738021364176,
+      "actualMargin": -4,
+      "modelTotal": 59.11350476181776,
+      "actualTotal": 78,
+      "week": 7,
+      "gameId": 401645343
+    },
+    {
+      "modelMargin": -2.9100782126437794,
+      "actualMargin": 3,
+      "modelTotal": 61.46727975216287,
+      "actualTotal": 55,
+      "week": 7,
+      "gameId": 401628388
+    },
+    {
+      "modelMargin": 10.39476127425798,
+      "actualMargin": 10,
+      "modelTotal": 62.57565249716929,
+      "actualTotal": 58,
+      "week": 7,
+      "gameId": 401643806
+    },
+    {
+      "modelMargin": -4.4256480108181595,
+      "actualMargin": 5,
+      "modelTotal": 47.16335604521458,
+      "actualTotal": 79,
+      "week": 7,
+      "gameId": 401643731
+    },
+    {
+      "modelMargin": -3.3632933285518822,
+      "actualMargin": 1,
+      "modelTotal": 54.72451233203173,
+      "actualTotal": 63,
+      "week": 7,
+      "gameId": 401628515
+    },
+    {
+      "modelMargin": 13.097953853141878,
+      "actualMargin": -7,
+      "modelTotal": 45.42552729198412,
+      "actualTotal": 33,
+      "week": 7,
+      "gameId": 401628387
+    },
+    {
+      "modelMargin": 1.6847821392922873,
+      "actualMargin": 1,
+      "modelTotal": 59.06321398766201,
+      "actualTotal": 47,
+      "week": 7,
+      "gameId": 401643804
+    },
+    {
+      "modelMargin": -0.016061358549666505,
+      "actualMargin": -7,
+      "modelTotal": 53.569026778897,
+      "actualTotal": 41,
+      "week": 7,
+      "gameId": 401635574
+    },
+    {
+      "modelMargin": -3.2203307995512693,
+      "actualMargin": -12,
+      "modelTotal": 53.79276227683178,
+      "actualTotal": 44,
+      "week": 7,
+      "gameId": 401636896
+    },
+    {
+      "modelMargin": -3.09764858372632,
+      "actualMargin": -4,
+      "modelTotal": 40.20918638831336,
+      "actualTotal": 38,
+      "week": 7,
+      "gameId": 401628514
+    },
+    {
+      "modelMargin": -4.0477178993915075,
+      "actualMargin": -3,
+      "modelTotal": 55.117068721442855,
+      "actualTotal": 59,
+      "week": 7,
+      "gameId": 401636894
+    },
+    {
+      "modelMargin": -19.805893920933148,
+      "actualMargin": -21,
+      "modelTotal": 60.47250751509105,
+      "actualTotal": 35,
+      "week": 7,
+      "gameId": 401643728
+    }
+  ],
+  "referencePeriod": "2024 weeks 1–7",
+  "calibrationPeriod": "2024 weeks 8 onward; bandwidth and monotone CDF calibration selected here",
+  "bandwidths": {
+    "margin": 14,
+    "total": 10
+  },
+  "tailScales": {
+    "margin": 8.265580042574872,
+    "total": 9.357525317460928
+  },
+  "transforms": {
+    "margin": {
+      "intercept": 0,
+      "slope": 1
+    },
+    "total": {
+      "intercept": 0,
+      "slope": 1
+    }
+  },
+  "calibration": {
+    "spread": {
+      "n": 392,
+      "bins": [
+        {
+          "from": 0,
+          "to": 0.2,
+          "n": 0,
+          "weeks": 0
+        },
+        {
+          "from": 0.2,
+          "to": 0.4,
+          "n": 0,
+          "weeks": 0
+        },
+        {
+          "from": 0.4,
+          "to": 0.6,
+          "n": 392,
+          "weeks": 9,
+          "predicted": 0.5008869227440597,
+          "observed": 0.5204081632653061,
+          "errorLower": -0.02989287503665533,
+          "errorUpper": 0.07135976491944782
+        },
+        {
+          "from": 0.6,
+          "to": 0.8,
+          "n": 0,
+          "weeks": 0
+        },
+        {
+          "from": 0.8,
+          "to": 1,
+          "n": 0,
+          "weeks": 0
+        }
+      ]
+    },
+    "moneyline": {
+      "n": 399,
+      "bins": [
+        {
+          "from": 0,
+          "to": 0.2,
+          "n": 31,
+          "weeks": 7,
+          "predicted": 0.1375579510245272,
+          "observed": 0.22580645161290322,
+          "errorLower": -0.04585325973840934,
+          "errorUpper": 0.27006017583198144
+        },
+        {
+          "from": 0.2,
+          "to": 0.4,
+          "n": 78,
+          "weeks": 8,
+          "predicted": 0.3036430540319761,
+          "observed": 0.3333333333333333,
+          "errorLower": -0.06491788397565729,
+          "errorUpper": 0.139944927169745
+        },
+        {
+          "from": 0.4,
+          "to": 0.6,
+          "n": 106,
+          "weeks": 8,
+          "predicted": 0.5092787216242638,
+          "observed": 0.4528301886792453,
+          "errorLower": -0.14790308262017138,
+          "errorUpper": 0.038305450590708334
+        },
+        {
+          "from": 0.6,
+          "to": 0.8,
+          "n": 105,
+          "weeks": 9,
+          "predicted": 0.6880714676510952,
+          "observed": 0.7714285714285715,
+          "errorLower": -0.04109981938008804,
+          "errorUpper": 0.18311447846637802
+        },
+        {
+          "from": 0.8,
+          "to": 1,
+          "n": 79,
+          "weeks": 7,
+          "predicted": 0.8897637599322173,
+          "observed": 0.9240506329113924,
+          "errorLower": -0.04571978779583141,
+          "errorUpper": 0.09538110336439949
+        }
+      ]
+    },
+    "total": {
+      "n": 389,
+      "bins": [
+        {
+          "from": 0,
+          "to": 0.2,
+          "n": 0,
+          "weeks": 0
+        },
+        {
+          "from": 0.2,
+          "to": 0.4,
+          "n": 0,
+          "weeks": 0
+        },
+        {
+          "from": 0.4,
+          "to": 0.6,
+          "n": 388,
+          "weeks": 9,
+          "predicted": 0.5120850424671685,
+          "observed": 0.5335051546391752,
+          "errorLower": -0.028305662697354628,
+          "errorUpper": 0.07048892054234479
+        },
+        {
+          "from": 0.6,
+          "to": 0.8,
+          "n": 1,
+          "weeks": 1,
+          "predicted": 0.6253387353435043,
+          "observed": 1,
+          "errorLower": -0.4187954438696113,
+          "errorUpper": 0.37466126465649574
+        },
+        {
+          "from": 0.8,
+          "to": 1,
+          "n": 0,
+          "weeks": 0
+        }
+      ]
+    }
+  },
+  "qualified": false,
+  "limitations": [
+    "Drive-model shrinkage was previously selected using 2024; all 2024 results are development, not an untouched calibration audit.",
+    "2025 has been inspected repeatedly and is diagnostic only.",
+    "Historical prices are closing point lines; original moneyline prices and historical personnel states are unavailable.",
+    "Research bounds describe finite reference samples and calibration groups, not validated individual-game confidence coverage."
+  ],
+  "marginDistributionSelection": {
+    "scale": 9,
+    "slope": 0,
+    "score": 0.6536605566591126
+  },
+  "totalDistributionSelection": {
+    "scale": 8,
+    "offset": 0,
+    "score": 0.7763576608929915
+  },
+  "totalsSignalRetention": 0.5267162056556597,
+  "diagnostic": {
+    "spread": {
+      "n": 533,
+      "decided": 522,
+      "pushes": 11,
+      "brier": 0.2517622448371099,
+      "benchmarkBrier": 0.25,
+      "benchmark": "50% point-line benchmark on decided outcomes; historical prices unavailable",
+      "meanPredicted": 0.4979145692014526,
+      "meanObserved": 0.5134099616858238,
+      "uncertaintySupported": 532
+    },
+    "moneyline": {
+      "n": 533,
+      "decided": 533,
+      "pushes": 0,
+      "brier": 0.17521264940611908,
+      "benchmarkBrier": 0.17569611105474453,
+      "benchmark": "Spread-derived benchmark, NOT historical sportsbook moneyline probabilities",
+      "meanPredicted": 0.557147555933803,
+      "meanObserved": 0.5703564727954972,
+      "uncertaintySupported": 533
+    },
+    "total": {
+      "n": 533,
+      "decided": 533,
+      "pushes": 0,
+      "brier": 0.25158036181330695,
+      "benchmarkBrier": 0.25,
+      "benchmark": "50% point-line benchmark on decided outcomes; historical prices unavailable",
+      "meanPredicted": 0.5087175249216003,
+      "meanObserved": 0.474671669793621,
+      "uncertaintySupported": 533
+    }
+  },
+  "implementationHash": "52b7b115006adb4bca1559ceb7edb01ab5d59056935a6b36ff8c6dfa31f2d6b6",
+  "artifactHash": "17b8a15272a430aa2fe94dd6faa0e340167968a1761c303837d51fb01f138129"
+}

@@ -1,8 +1,12 @@
-# Personal data and research scripts — never intended for the published site.
-# The dashboard and its methodology doc are added explicitly by name instead
-# of via `git add .`, but this is a safety net against that changing later.
-*.ps1
-*.csv
-bet-tracker-backup-*.json
-backtest-log-backup-*.json
-_preview_*.html
+data/
+seed/
+research/reconstructed-cases.json
+public/NCAA-AI-Research.js
+.env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.log
+node_modules/

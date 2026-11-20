@@ -1,0 +1,78 @@
+{
+  "protocol": {
+    "version": "totals-residual-v2",
+    "purpose": "Repair totals probability construction without tuning to reused 2025/2026 outcomes.",
+    "training": "2023 prior-game raw possession totals; do not use the old score calibration fitted on all 2023 outcomes",
+    "features": [
+      "intercept",
+      "raw possession total minus consensus total, divided by 10",
+      "consensus total minus 55, divided by 10"
+    ],
+    "regularization": "Choose ridge penalty from 10,100,1000 using rolling 2023 weeks 6,9,12 with next-three-week squared error. Fit on 2023 only.",
+    "distribution": "Smoothed discrete residual distribution from rolling 2023 predictions only, logistic kernel bandwidth 2 points, support integer scores 0 through 250. Never use future game residuals.",
+    "calibration": "2024 development calibration groups, minimum 30 decisions and 4 weeks; no claim of untouched validation because legacy possession shrinkage was selected on 2024",
+    "diagnostics": "2025 and 2026 are already inspected retrospective samples. Evaluate same-game old/new/market MAE, Brier, log loss and week-block paired Brier differences. No re-tuning after results.",
+    "releaseRule": "Only consider activating this candidate if its paired week-block Brier difference upper bound is below zero against a 50 percent line benchmark in BOTH retrospective years, and point MAE is no worse than market in both years. Even passing this diagnostic is not proof of profitable odds; prospective tracking remains required.",
+    "onFailure": "Keep totals as comparison-only research, with no actionable total selection or automated AI totals pick. Preserve the candidate and evidence for forward testing. Do not force total picks.",
+    "paidRequests": 0
+  },
+  "candidates": [
+    {
+      "penalty": 1000,
+      "mse": 240.95449094500333
+    },
+    {
+      "penalty": 100,
+      "mse": 241.17935377766875
+    },
+    {
+      "penalty": 10,
+      "mse": 242.79858538510732
+    }
+  ],
+  "coefficients": [
+    0.5144714932132044,
+    -0.06116335898243061,
+    -0.3014368749742838
+  ],
+  "diagnostics": {
+    "2025": {
+      "n": 578,
+      "decided": 578,
+      "oldBrier": 0.2517266732070739,
+      "candidateBrier": 0.25202236584015675,
+      "benchmarkBrier": 0.25,
+      "pairedBrierDifferenceBand": [
+        0.0002012428083939959,
+        0.003961438939658516
+      ],
+      "oldMAE": 12.408436255278604,
+      "candidateMAE": 12.407429549684744,
+      "marketMAE": 12.379325259515571,
+      "meanProbability": 0.5267611566054307,
+      "observedOverRate": 0.4757785467128028,
+      "candidateLogLoss": 0.6972058309695918
+    },
+    "2026": {
+      "n": 408,
+      "decided": 408,
+      "oldBrier": 0.2556642684480935,
+      "candidateBrier": 0.25354034979725604,
+      "benchmarkBrier": 0.25,
+      "pairedBrierDifferenceBand": [
+        0.00006181423872665203,
+        0.006842348476660889
+      ],
+      "oldMAE": 12.90898419044102,
+      "candidateMAE": 12.813958611547939,
+      "marketMAE": 12.745710784313726,
+      "meanProbability": 0.5254109637835338,
+      "observedOverRate": 0.46568627450980393,
+      "candidateLogLoss": 0.700241011856468
+    }
+  },
+  "release": {
+    "eligible": false,
+    "reason": "Predeclared paired probability and point-error comparison in both reused retrospective years; no prospective profit validation"
+  }
+}

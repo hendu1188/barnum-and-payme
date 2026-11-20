@@ -1,0 +1,4 @@
+'use strict';
+const {passwordHash}=require('./runtime.cjs');
+if(!process.stdin.isTTY){let password='';process.stdin.setEncoding('utf8');process.stdin.on('data',s=>password+=s);process.stdin.on('end',()=>{password=password.replace(/[\r\n]+$/,'');if(password.length<20){console.error('Use at least 20 characters');process.exitCode=1;}else console.log(passwordHash(password));});}
+else{process.stdout.write('Owner password (at least 20 characters; input hidden): ');process.stdin.setRawMode(true);process.stdin.resume();process.stdin.setEncoding('utf8');let password='';process.stdin.on('data',s=>{if(s==='\u0003')process.exit(1);if(s==='\r'||s==='\n'){process.stdin.setRawMode(false);process.stdin.pause();if(password.length<20){console.error('\nUse at least 20 characters');process.exitCode=1;}else console.log('\n'+passwordHash(password));return;}if(s==='\u007f')password=password.slice(0,-1);else if(!/[\x00-\x1f]/.test(s))password+=s;});}
